@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B8A87">
+<title>صيانتي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#0B8A87; --teal-dark:#087271; --teal-soft:#E3F2F1;
+    --ink:#0E2A2F; --muted:#4A6266; --line:#CFE0E0; --bg:#F4F8F8; --card:#FFFFFF; --danger:#B42318;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);
+    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .wrap{max-width:460px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+  .hidden{display:none!important}
+  .hero{background:var(--teal);color:#fff;padding:40px 24px 32px;border-radius:0 0 32px 32px;display:flex;flex-direction:column;gap:18px}
+  .brand{display:flex;align-items:center;gap:10px;font-size:26px;font-weight:800}
+  .hero h1{margin:0;font-size:24px;font-weight:800}
+  .hero p{margin:0;color:#D9EFEE;font-size:16px;line-height:1.6}
+  .body{padding:24px;display:flex;flex-direction:column;gap:16px;flex:1}
+  label{font-size:16px;font-weight:700}
+  .field{display:flex;flex-direction:column;gap:8px}
+  input,select{height:52px;border:1.5px solid var(--line);border-radius:14px;padding:0 14px;font:inherit;font-size:17px;color:var(--ink);background:#fff;width:100%}
+  input:focus,select:focus{outline:3px solid var(--teal-soft);border-color:var(--teal)}
+  .phone{display:flex;gap:8px;direction:ltr}
+  .phone span{height:52px;display:flex;align-items:center;padding:0 14px;border-radius:14px;background:var(--teal-soft);color:var(--teal-dark);font-weight:800}
+  .btn{height:56px;border:none;border-radius:18px;background:var(--teal);color:#fff;font:inherit;font-size:18px;font-weight:800;width:100%;cursor:pointer}
+  .btn:disabled{opacity:.6}
+  .btn.ghost{background:transparent;color:var(--teal-dark);height:44px;font-size:15px}
+  .btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+  .msg{font-size:15px;min-height:20px}
+  .msg.err{color:var(--danger)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .carcard{background:#fff;border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px;color:var(--ink)}
+  .carcard .ic{width:52px;height:52px;border-radius:14px;background:var(--teal-soft);display:flex;align-items:center;justify-content:center}
+  .carcard b{font-size:17px;display:block}
+  .carcard small{font-size:14px;color:var(--muted)}
+  .cta{background:var(--ink);color:#fff;border:none;border-radius:22px;padding:22px;display:flex;align-items:center;gap:16px;font:inherit;text-align:right;width:100%;cursor:pointer}
+  .cta .ic{width:52px;height:52px;border-radius:26px;background:var(--teal);display:flex;align-items:center;justify-content:center;flex:none}
+  .cta b{display:block;font-size:19px}
+  .cta small{font-size:14px;color:#CFE3E2}
+  h2{margin:8px 0 0;font-size:18px;font-weight:800}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .steps div{background:#fff;border-radius:16px;padding:14px 8px;text-align:center;font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .steps i{font-style:normal;width:32px;height:32px;border-radius:16px;background:var(--teal-soft);color:var(--teal);font-weight:800;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- شاشة الدخول -->
+  <section id="login">
+    <div class="hero">
+      <div class="brand">
+        <svg width="40" height="40" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/><path d="M26 70H94V61Q94 55 88 54L81 53 71 40H47L37 53 32 54Q26 55 26 61Z" fill="none" stroke="#0B8A87" stroke-width="6" stroke-linejoin="round"/><circle cx="43" cy="70" r="8" fill="#fff" stroke="#0B8A87" stroke-width="6"/><circle cx="77" cy="70" r="8" fill="#fff" stroke="#0B8A87" stroke-width="6"/></svg>
+        صيانتي
+      </div>
+      <h1>مستشارك الموثوق لسيارتك</h1>
+      <p>اشرح مشكلة سيارتك، ويرد عليك مستشار صيانة بالتشخيص والتكلفة التقريبية وأقرب مركز موثوق.</p>
+    </div>
+    <div class="body">
+      <div id="stepPhone" class="field">
+        <label for="phone">رقم الجوال</label>
+        <div class="phone"><span>+966</span><input id="phone" type="tel" inputmode="numeric" placeholder="5XXXXXXXX" autocomplete="tel"></div>
+        <button id="sendBtn" class="btn">أرسل رمز التحقق</button>
+      </div>
+      <div id="stepCode" class="field hidden">
+        <label for="code">رمز التحقق المرسل لجوالك</label>
+        <input id="code" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code" style="direction:ltr;text-align:center;letter-spacing:8px">
+        <button id="verifyBtn" class="btn">تأكيد الدخول</button>
+        <button id="backBtn" class="btn ghost">تغيير الرقم</button>
+      </div>
+      <div id="loginMsg" class="msg" role="status"></div>
+    </div>
+  </section>
+
+  <!-- إكمال البيانات -->
+  <section id="profile" class="hidden">
+    <div class="hero"><h1>بيانات سيارتك</h1><p>نحتاجها مرة وحدة عشان يفهم المستشار حالتك بسرعة.</p></div>
+    <div class="body">
+      <div class="field"><label for="name">الاسم</label><input id="name" type="text" autocomplete="name"></div>
+      <div class="field"><label for="make">نوع السيارة</label><input id="make" type="text" placeholder="مثال: تويوتا"></div>
+      <div class="row">
+        <div class="field"><label for="model">الموديل</label><input id="model" type="text" placeholder="مثال: كامري"></div>
+        <div class="field"><label for="year">السنة</label><select id="year"></select></div>
+      </div>
+      <div class="field"><label for="city">المدينة</label><input id="city" type="text" placeholder="مثال: جدة"></div>
+      <button id="saveBtn" class="btn">حفظ والمتابعة</button>
+      <div id="profileMsg" class="msg" role="status"></div>
+    </div>
+  </section>
+
+  <!-- الرئيسية -->
+  <section id="home" class="hidden">
+    <div class="hero">
+      <div class="brand" style="font-size:22px">صيانتي</div>
+      <h1 id="hello">أهلًا</h1>
+      <div class="carcard">
+        <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0B8A87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14v-4l-2-5H7l-2 5z"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg></div>
+        <div style="flex:1"><b id="carName"></b><small id="carYear"></small></div>
+        <button id="editCar" class="btn ghost" style="width:auto;padding:0 8px">تعديل</button>
+      </div>
+    </div>
+    <div class="body">
+      <button id="newReq" class="cta">
+        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6M9 10h6"/></svg></span>
+        <span><b>اطلب استشارتك الآن</b><small>اشرح المشكلة ومستشارنا يرد عليك</small></span>
+      </button>
+      <div id="homeMsg" class="msg" role="status"></div>
+      <h2>كيف تعمل الخدمة؟</h2>
+      <div class="steps"><div><i>١</i>وصف المشكلة</div><div><i>٢</i>استشارة المستشار</div><div><i>٣</i>التوجه لمركز موثوق</div></div>
+      <button id="logout" class="btn ghost">تسجيل الخروج</button>
+    </div>
+  </section>
+
+  <div id="recaptcha"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCFGwmvvvG2skW-c9KdwPWchcD-x-ahOfM",
+  authDomain: "siyanati-a2d39.firebaseapp.com",
+  projectId: "siyanati-a2d39",
+  storageBucket: "siyanati-a2d39.firebasestorage.app",
+  messagingSenderId: "671981506093",
+  appId: "1:671981506093:web:18f5082b7545681ff832a4"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+auth.languageCode = "ar";
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+const show = id => ["login","profile","home"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+const say = (el, text, err=false) => { $(el).textContent = text; $(el).classList.toggle("err", err); };
+
+// سنوات الموديل
+const y = new Date().getFullYear() + 1;
+for (let i = y; i >= 1990; i--) $("year").add(new Option(i, i));
+
+let verifier, confirmation, profileData = null;
+
+function normalizePhone(v){
+  let d = v.replace(/\D/g, "");
+  if (d.startsWith("966")) d = d.slice(3);
+  if (d.startsWith("0")) d = d.slice(1);
+  return /^5\d{8}$/.test(d) ? "+966" + d : null;
+}
+
+$("sendBtn").onclick = async () => {
+  const phone = normalizePhone($("phone").value);
+  if (!phone) return say("loginMsg", "اكتب رقم جوال سعودي صحيح يبدأ بـ 5 ومكوّن من 9 أرقام.", true);
+  $("sendBtn").disabled = true; say("loginMsg", "جاري إرسال الرمز…");
+  try {
+    if (!verifier) verifier = new RecaptchaVerifier(auth, "recaptcha", { size: "invisible" });
+    confirmation = await signInWithPhoneNumber(auth, phone, verifier);
+    $("stepPhone").classList.add("hidden"); $("stepCode").classList.remove("hidden");
+    say("loginMsg", "أرسلنا رمز التحقق إلى " + phone); $("code").focus();
+  } catch (e) {
+    console.error(e);
+    const m = e.code === "auth/too-many-requests" ? "محاولات كثيرة. حاول بعد قليل."
+            : e.code === "auth/unauthorized-domain" ? "هذا النطاق غير مضاف في Firebase (Authorized domains)."
+            : "تعذّر إرسال الرمز: " + (e.code || e.message);
+    say("loginMsg", m, true);
+    if (verifier) { verifier.clear(); verifier = null; }
+  } finally { $("sendBtn").disabled = false; }
+};
+
+$("verifyBtn").onclick = async () => {
+  const code = $("code").value.trim();
+  if (code.length !== 6) return say("loginMsg", "الرمز مكوّن من 6 أرقام.", true);
+  $("verifyBtn").disabled = true; say("loginMsg", "جاري التحقق…");
+  try { await confirmation.confirm(code); say("loginMsg", ""); }
+  catch (e) { say("loginMsg", "الرمز غير صحيح أو انتهت صلاحيته.", true); }
+  finally { $("verifyBtn").disabled = false; }
+};
+
+$("backBtn").onclick = () => { $("stepCode").classList.add("hidden"); $("stepPhone").classList.remove("hidden"); say("loginMsg", ""); };
+
+onAuthStateChanged(auth, async user => {
+  if (!user) return show("login");
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    profileData = snap.exists() ? snap.data() : null;
+    profileData && profileData.car ? renderHome() : openProfile();
+  } catch (e) { console.error(e); openProfile(); say("profileMsg", "تعذّر قراءة بياناتك: " + (e.code || e.message), true); }
+});
+
+function openProfile(){
+  const p = profileData || {};
+  $("name").value = p.name || "";
+  $("make").value = p.car?.make || ""; $("model").value = p.car?.model || "";
+  if (p.car?.year) $("year").value = p.car.year;
+  $("city").value = p.city || "";
+  show("profile");
+}
+
+$("saveBtn").onclick = async () => {
+  const data = {
+    name: $("name").value.trim(), city: $("city").value.trim(),
+    car: { make: $("make").value.trim(), model: $("model").value.trim(), year: Number($("year").value) }
+  };
+  if (!data.name || !data.car.make || !data.car.model) return say("profileMsg", "عبّئ الاسم ونوع السيارة والموديل.", true);
+  $("saveBtn").disabled = true; say("profileMsg", "جاري الحفظ…");
+  try {
+    const user = auth.currentUser;
+    await setDoc(doc(db, "users", user.uid), { ...data, phone: user.phoneNumber, role: profileData?.role || "customer", updatedAt: serverTimestamp() }, { merge: true });
+    profileData = { ...profileData, ...data };
+    say("profileMsg", ""); renderHome();
+  } catch (e) { say("profileMsg", "تعذّر الحفظ: " + (e.code || e.message), true); }
+  finally { $("saveBtn").disabled = false; }
+};
+
+function renderHome(){
+  $("hello").textContent = "أهلًا " + (profileData.name || "");
+  $("carName").textContent = profileData.car.make + " " + profileData.car.model;
+  $("carYear").textContent = "موديل " + profileData.car.year;
+  show("home");
+}
+
+$("editCar").onclick = openProfile;
+$("newReq").onclick = () => say("homeMsg", "صفحة إرسال الطلب هي خطوتنا القادمة.");
+$("logout").onclick = () => signOut(auth);
+</script>
+</body>
+</html>
