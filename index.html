@@ -84,10 +84,18 @@
     <div class="hero"><h1>بيانات سيارتك</h1><p>نحتاجها مرة وحدة عشان يفهم المستشار حالتك بسرعة.</p></div>
     <div class="body">
       <div class="field"><label for="name">الاسم</label><input id="name" type="text" autocomplete="name"></div>
-      <div class="field"><label for="make">نوع السيارة</label><input id="make" type="text" placeholder="مثال: تويوتا"></div>
+      <div class="field">
+        <label for="make">نوع السيارة</label>
+        <select id="make"><option value="">اختر نوع السيارة</option></select>
+        <input id="makeOther" type="text" class="hidden" placeholder="اكتب نوع السيارة">
+      </div>
       <div class="row">
-        <div class="field"><label for="model">الموديل</label><input id="model" type="text" placeholder="مثال: كامري"></div>
-        <div class="field"><label for="year">السنة</label><select id="year"></select></div>
+        <div class="field"><label for="model">الموديل</label><input id="model" type="text" list="models" placeholder="اختر أو اكتب"><datalist id="models"></datalist></div>
+        <div class="field"><label for="year">سنة الصنع</label><select id="year"><option value="">اختر السنة</option></select></div>
+      </div>
+      <div class="field">
+        <label for="vin">رقم الهيكل (VIN)</label>
+        <input id="vin" type="text" maxlength="17" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="17 خانة — تجده في استمارة السيارة" style="direction:ltr;text-align:left;letter-spacing:1px">
       </div>
       <div class="field"><label for="city">المدينة</label><input id="city" type="text" placeholder="مثال: جدة"></div>
       <button id="saveBtn" class="btn">حفظ والمتابعة</button>
@@ -144,9 +152,56 @@ const $ = id => document.getElementById(id);
 const show = id => ["login","profile","home"].forEach(s => $(s).classList.toggle("hidden", s !== id));
 const say = (el, text, err=false) => { $(el).textContent = text; $(el).classList.toggle("err", err); };
 
-// سنوات الموديل
+// سنوات الصنع
 const y = new Date().getFullYear() + 1;
 for (let i = y; i >= 1990; i--) $("year").add(new Option(i, i));
+
+// أنواع السيارات وموديلاتها الشائعة
+const CARS = {
+  "تويوتا": ["كامري","كورولا","يارس","لاند كروزر","برادو","هايلكس","راف فور","فورتشنر","أفالون","كراون","سيكويا","هايس","رايز"],
+  "هيونداي": ["أكسنت","النترا","سوناتا","أزيرا","توسان","سنتافي","كريتا","باليسيد","فينيو","ستاريا"],
+  "نيسان": ["صني","سنترا","ألتيما","ماكسيما","باترول","إكس تريل","كيكس","باثفايندر","نافارا"],
+  "كيا": ["بيجاس","ريو","سيراتو","K5","K8","سونيت","سيلتوس","سبورتاج","سورينتو","تيلورايد","كارنفال"],
+  "لكزس": ["ES","IS","LS","NX","RX","GX","LX","UX"],
+  "شيفروليه": ["ماليبو","كابتيفا","جروف","تاهو","سوبربان","سلفرادو","تريل بليزر"],
+  "جي إم سي": ["يوكن","سييرا","تيرين","أكاديا"],
+  "فورد": ["تورس","إكسبلورر","إكسبيدشن","تيريتوري","برونكو","رينجر","F-150","موستنج"],
+  "هوندا": ["سيتي","سيفيك","أكورد","CR-V","HR-V","بايلوت"],
+  "مازدا": ["2","3","6","CX-3","CX-5","CX-9","CX-90"],
+  "ميتسوبيشي": ["أتراج","لانسر","إكسباندر","أوتلاندر","مونتيرو سبورت","L200"],
+  "جيلي": ["إمجراند","كولراي","توجيلا","أوكافانجو","مونجارو","ستاري"],
+  "شانجان": ["ألسفن","إيدو","CS35","CS75","CS85","CS95","UNI-K","UNI-T"],
+  "إم جي": ["MG5","MG6","GT","ZS","RX5","RX8","HS","One"],
+  "هافال": ["جوليان","H6","H9","دارجو"],
+  "شيري": ["أريزو 5","أريزو 6","تيجو 4","تيجو 7","تيجو 8"],
+  "جيتور": ["X70","X90","T2","داشينج"],
+  "جينيسيس": ["G70","G80","G90","GV70","GV80"],
+  "مرسيدس": ["C","E","S","GLC","GLE","GLS","G"],
+  "بي إم دبليو": ["الفئة 3","الفئة 5","الفئة 7","X3","X5","X6","X7"],
+  "أودي": ["A4","A6","A8","Q3","Q5","Q7","Q8"],
+  "لاند روفر": ["رينج روفر","رينج روفر سبورت","فيلار","إيفوك","ديفندر","ديسكفري"],
+  "جيب": ["رانجلر","جراند شيروكي","شيروكي","كومباس","جلاديتور"],
+  "دودج": ["تشارجر","تشالنجر","دورانجو","رام"],
+  "كاديلاك": ["إسكاليد","CT4","CT5","XT4","XT5","XT6"],
+  "إنفينيتي": ["Q50","QX50","QX55","QX60","QX80"],
+  "فولكس فاجن": ["جيتا","باسات","تيغوان","تيرامونت","توارق"],
+  "بورش": ["كايين","ماكان","باناميرا","911","تايكان"],
+  "سوزوكي": ["سويفت","ديزاير","بالينو","سيازو","فيتارا","جيمني","إرتيجا"],
+  "إيسوزو": ["دي ماكس","إم يو-إكس"],
+  "بي واي دي": ["سونغ","تانغ","سيل","أتو 3","هان"],
+  "تسلا": ["Model 3","Model Y","Model S","Model X"],
+  "لوسيد": ["Air","Gravity"]
+};
+for (const b of Object.keys(CARS)) $("make").add(new Option(b, b));
+$("make").add(new Option("نوع آخر", "__other"));
+
+function fillModels(){
+  const list = CARS[$("make").value] || [];
+  $("models").innerHTML = list.map(m => `<option value="${m}">`).join("");
+  $("makeOther").classList.toggle("hidden", $("make").value !== "__other");
+}
+$("make").onchange = () => { $("model").value = ""; fillModels(); };
+$("vin").oninput = e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); };
 
 let verifier, confirmation, profileData = null;
 
@@ -199,18 +254,27 @@ onAuthStateChanged(auth, async user => {
 function openProfile(){
   const p = profileData || {};
   $("name").value = p.name || "";
-  $("make").value = p.car?.make || ""; $("model").value = p.car?.model || "";
-  if (p.car?.year) $("year").value = p.car.year;
+  const make = p.car?.make || "";
+  if (!make) $("make").value = "";
+  else if (CARS[make]) $("make").value = make;
+  else { $("make").value = "__other"; $("makeOther").value = make; }
+  fillModels();
+  $("model").value = p.car?.model || "";
+  $("year").value = p.car?.year || "";
+  $("vin").value = p.car?.vin || "";
   $("city").value = p.city || "";
   show("profile");
 }
 
 $("saveBtn").onclick = async () => {
+  const make = $("make").value === "__other" ? $("makeOther").value.trim() : $("make").value;
+  const vin = $("vin").value.trim();
   const data = {
     name: $("name").value.trim(), city: $("city").value.trim(),
-    car: { make: $("make").value.trim(), model: $("model").value.trim(), year: Number($("year").value) }
+    car: { make, model: $("model").value.trim(), year: Number($("year").value), vin }
   };
-  if (!data.name || !data.car.make || !data.car.model) return say("profileMsg", "عبّئ الاسم ونوع السيارة والموديل.", true);
+  if (!data.name || !make || !data.car.model || !data.car.year) return say("profileMsg", "عبّئ الاسم ونوع السيارة والموديل وسنة الصنع.", true);
+  if (vin && !/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) return say("profileMsg", "رقم الهيكل يتكون من 17 خانة (أرقام وحروف إنجليزية بدون I و O و Q).", true);
   $("saveBtn").disabled = true; say("profileMsg", "جاري الحفظ…");
   try {
     const user = auth.currentUser;
@@ -224,7 +288,7 @@ $("saveBtn").onclick = async () => {
 function renderHome(){
   $("hello").textContent = "أهلًا " + (profileData.name || "");
   $("carName").textContent = profileData.car.make + " " + profileData.car.model;
-  $("carYear").textContent = "موديل " + profileData.car.year;
+  $("carYear").textContent = "سنة الصنع " + profileData.car.year + (profileData.car.vin ? " · الهيكل …" + profileData.car.vin.slice(-6) : "");
   show("home");
 }
 
