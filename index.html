@@ -47,6 +47,33 @@
   h2{margin:8px 0 0;font-size:18px;font-weight:800}
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .steps div{background:#fff;border-radius:16px;padding:14px 8px;text-align:center;font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .topbar{display:flex;align-items:center;gap:12px;padding:24px 20px 8px}
+  .topbar h1{margin:0;font-size:22px;font-weight:800}
+  .iconbtn{width:44px;height:44px;border-radius:22px;border:none;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+  textarea{min-height:120px;border:1.5px solid var(--line);border-radius:16px;padding:14px;font:inherit;font-size:16px;color:var(--ink);background:#fff;resize:vertical;width:100%;line-height:1.6}
+  textarea:focus{outline:3px solid var(--teal-soft);border-color:var(--teal)}
+  .attach{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .attach button{height:92px;border:1.5px dashed var(--teal);border-radius:16px;background:#fff;font:inherit;font-size:14px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .attach button.rec{background:#FDECEC;border-color:var(--danger);color:var(--danger)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:var(--teal-soft);color:var(--teal-dark);border-radius:12px;padding:8px 10px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;max-width:100%}
+  .chip img{width:40px;height:40px;object-fit:cover;border-radius:8px}
+  .chip button{border:none;background:none;color:var(--danger);font-size:20px;line-height:1;cursor:pointer;padding:0 4px;min-width:28px;min-height:28px}
+  .opt{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+  .opt:has(input:checked){border:2px solid var(--teal)}
+  .opt input{width:20px;height:20px;accent-color:var(--teal);margin:0}
+  .opt b{display:block;font-size:16px}
+  .opt small{font-size:13px;color:var(--muted)}
+  .opt .price{margin-inline-start:auto;font-weight:800;color:var(--teal-dark);white-space:nowrap}
+  .bar{height:8px;border-radius:4px;background:var(--teal-soft);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--teal);transition:width .2s}
+  .req{background:#fff;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+  .req .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .req b{font-size:15px;line-height:1.5}
+  .req small{font-size:13px;color:var(--muted)}
+  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;background:var(--teal-soft);color:var(--teal-dark)}
+  .badge.wait{background:#FCEFD9;color:#8A4B0B}
+  .note{font-size:13px;color:var(--muted);text-align:center}
   .steps i{font-style:normal;width:32px;height:32px;border-radius:16px;background:var(--teal-soft);color:var(--teal);font-weight:800;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
@@ -122,7 +149,62 @@
       <div id="homeMsg" class="msg" role="status"></div>
       <h2>كيف تعمل الخدمة؟</h2>
       <div class="steps"><div><i>١</i>وصف المشكلة</div><div><i>٢</i>استشارة المستشار</div><div><i>٣</i>التوجه لمركز موثوق</div></div>
+      <h2>استشاراتي</h2>
+      <div id="myReqs" style="display:flex;flex-direction:column;gap:10px"><div class="note">ما عندك استشارات للحين.</div></div>
       <button id="logout" class="btn ghost">تسجيل الخروج</button>
+    </div>
+  </section>
+
+  <!-- إرسال الطلب -->
+  <section id="request" class="hidden">
+    <div class="topbar">
+      <button id="reqBack" class="iconbtn" aria-label="رجوع"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0E2A2F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+      <h1>وصف المشكلة</h1>
+    </div>
+    <div class="body" style="padding-top:8px">
+      <div class="field">
+        <label for="desc">وش المشكلة اللي تلاحظها في السيارة؟</label>
+        <textarea id="desc" placeholder="مثال: صوت طقطقة من الأمام عند الفرملة، بدأ من أسبوع ويزيد مع السرعة."></textarea>
+      </div>
+      <div class="field">
+        <label>مرفقات توضّح المشكلة</label>
+        <div class="attach">
+          <button id="addPhoto" type="button">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0B8A87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></svg>
+            صور</button>
+          <button id="recBtn" type="button">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg>
+            <span id="recLabel">تسجيل صوت السيارة</span></button>
+          <button id="addVideo" type="button">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0B8A87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg>
+            فيديو قصير</button>
+        </div>
+        <input id="photoIn" type="file" accept="image/*" multiple class="hidden">
+        <input id="videoIn" type="file" accept="video/*" class="hidden">
+        <div id="chips" class="chips"></div>
+        <div class="note" style="text-align:right">الصور حتى 10 ميجا، والفيديو حتى 50 ميجا (يفضّل أقل من دقيقة)، والتسجيل الصوتي حتى دقيقتين.</div>
+      </div>
+      <fieldset style="border:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px">
+        <legend style="font-size:16px;font-weight:700;padding:0;margin-bottom:8px">طريقة رد المستشار</legend>
+        <label class="opt"><input type="radio" name="reply" value="chat" checked><span><b>محادثة كتابية</b><small>رد مكتوب تقرأه في أي وقت</small></span><span class="price">25 ر.س</span></label>
+        <label class="opt"><input type="radio" name="reply" value="call"><span><b>مكالمة صوتية</b><small>يتصل عليك المستشار ويشرح لك</small></span><span class="price">45 ر.س</span></label>
+      </fieldset>
+      <div id="upWrap" class="field hidden"><div class="bar"><i id="upBar"></i></div><div id="upText" class="note"></div></div>
+      <button id="submitReq" class="btn">أرسل الطلب</button>
+      <div class="note">نسخة تجريبية: الدفع الإلكتروني يُضاف في الخطوة القادمة.</div>
+      <div id="reqMsg" class="msg" role="status"></div>
+    </div>
+  </section>
+
+  <!-- تم الإرسال -->
+  <section id="sent" class="hidden">
+    <div class="body" style="justify-content:center;align-items:center;text-align:center;gap:18px;min-height:80vh">
+      <div style="width:88px;height:88px;border-radius:44px;background:var(--teal);display:flex;align-items:center;justify-content:center">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+      </div>
+      <h1 style="margin:0;font-size:24px;font-weight:800">وصلنا طلبك</h1>
+      <p style="margin:0;color:var(--muted);font-size:16px;line-height:1.7;max-width:320px">بيراجع المستشار المشكلة والمرفقات، ويوصلك رده هنا في «استشاراتي».</p>
+      <button id="sentHome" class="btn" style="max-width:320px">الرجوع للرئيسية</button>
     </div>
   </section>
 
@@ -132,7 +214,8 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCFGwmvvvG2skW-c9KdwPWchcD-x-ahOfM",
@@ -147,9 +230,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 auth.languageCode = "ar";
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 const $ = id => document.getElementById(id);
-const show = id => ["login","profile","home"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+const show = id => { ["login","profile","home","request","sent"].forEach(s => $(s).classList.toggle("hidden", s !== id)); window.scrollTo(0, 0); };
 const say = (el, text, err=false) => { $(el).textContent = text; $(el).classList.toggle("err", err); };
 
 // سنوات الصنع
@@ -290,10 +374,139 @@ function renderHome(){
   $("carName").textContent = profileData.car.make + " " + profileData.car.model;
   $("carYear").textContent = "سنة الصنع " + profileData.car.year + (profileData.car.vin ? " · الهيكل …" + profileData.car.vin.slice(-6) : "");
   show("home");
+  loadMyRequests();
 }
 
+// ===== قائمة استشاراتي =====
+const STATUS = { new: ["بانتظار المستشار", "wait"], accepted: ["قيد المتابعة", "wait"], answered: ["تم الرد", ""], closed: ["مكتملة", ""] };
+async function loadMyRequests(){
+  try {
+    const snap = await getDocs(query(collection(db, "requests"), where("uid", "==", auth.currentUser.uid)));
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    const box = $("myReqs");
+    if (!list.length) { box.innerHTML = '<div class="note">ما عندك استشارات للحين.</div>'; return; }
+    box.innerHTML = "";
+    for (const r of list) {
+      const [label, cls] = STATUS[r.status] || [r.status, ""];
+      const date = r.createdAt ? new Date(r.createdAt.seconds * 1000).toLocaleDateString("ar-SA") : "";
+      const el = document.createElement("div"); el.className = "req";
+      el.innerHTML = `<div class="top"><b></b><span class="badge ${cls}"></span></div><small></small>`;
+      el.querySelector("b").textContent = r.description.length > 70 ? r.description.slice(0, 70) + "…" : r.description;
+      el.querySelector(".badge").textContent = label;
+      el.querySelector("small").textContent = `${date} · ${r.replyType === "call" ? "مكالمة صوتية" : "محادثة كتابية"} · ${(r.attachments || []).length} مرفقات`;
+      box.appendChild(el);
+    }
+  } catch (e) { console.error(e); $("myReqs").innerHTML = '<div class="note">تعذّر تحميل استشاراتك.</div>'; }
+}
+
+// ===== إرسال الطلب =====
+const LIMITS = { image: 10, video: 50, audio: 20 }; // ميجا
+let files = []; // {kind, blob, name, url}
+let recorder = null, recChunks = [], recTimer = null, recSec = 0;
+
+function renderChips(){
+  const box = $("chips"); box.innerHTML = "";
+  files.forEach((f, i) => {
+    const c = document.createElement("div"); c.className = "chip";
+    if (f.kind === "image") { const im = document.createElement("img"); im.src = f.url; im.alt = ""; c.appendChild(im); }
+    const t = document.createElement("span");
+    t.textContent = f.kind === "image" ? "صورة" : f.kind === "video" ? "فيديو" : "تسجيل صوتي " + f.dur;
+    c.appendChild(t);
+    if (f.kind === "audio") { const a = document.createElement("audio"); a.controls = true; a.src = f.url; a.style.height = "32px"; a.style.maxWidth = "180px"; c.appendChild(a); }
+    const x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "حذف المرفق");
+    x.onclick = () => { URL.revokeObjectURL(f.url); files.splice(i, 1); renderChips(); };
+    c.appendChild(x); box.appendChild(c);
+  });
+}
+
+function addFile(kind, blob, extra = {}){
+  if (blob.size > LIMITS[kind] * 1024 * 1024) return say("reqMsg", `حجم الملف أكبر من ${LIMITS[kind]} ميجا.`, true);
+  files.push({ kind, blob, name: blob.name || kind, url: URL.createObjectURL(blob), ...extra });
+  say("reqMsg", ""); renderChips();
+}
+
+$("addPhoto").onclick = () => $("photoIn").click();
+$("addVideo").onclick = () => $("videoIn").click();
+$("photoIn").onchange = e => { [...e.target.files].forEach(f => addFile("image", f)); e.target.value = ""; };
+$("videoIn").onchange = e => { const f = e.target.files[0]; if (f) addFile("video", f); e.target.value = ""; };
+
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+function stopRec(){ if (recorder && recorder.state === "recording") recorder.stop(); }
+$("recBtn").onclick = async () => {
+  if (recorder && recorder.state === "recording") return stopRec();
+  if (!window.MediaRecorder) return say("reqMsg", "متصفحك لا يدعم التسجيل. صوّر فيديو قصير بدلًا منه.", true);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recChunks = []; recSec = 0;
+    recorder = new MediaRecorder(stream);
+    recorder.ondataavailable = e => e.data.size && recChunks.push(e.data);
+    recorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop()); clearInterval(recTimer);
+      $("recBtn").classList.remove("rec"); $("recLabel").textContent = "تسجيل صوت السيارة";
+      const blob = new Blob(recChunks, { type: recorder.mimeType || "audio/mp4" });
+      if (recSec >= 1) addFile("audio", blob, { dur: fmt(recSec) });
+    };
+    recorder.start();
+    $("recBtn").classList.add("rec");
+    $("recLabel").textContent = "إيقاف 0:00";
+    recTimer = setInterval(() => { recSec++; $("recLabel").textContent = "إيقاف " + fmt(recSec); if (recSec >= 120) stopRec(); }, 1000);
+  } catch (e) { console.error(e); say("reqMsg", "ما قدرنا نوصل للمايكروفون. اسمح للمتصفح باستخدامه من الإعدادات.", true); }
+};
+
+function resetRequest(){
+  stopRec(); files.forEach(f => URL.revokeObjectURL(f.url)); files = [];
+  $("desc").value = ""; renderChips(); say("reqMsg", "");
+  document.querySelector('input[name="reply"][value="chat"]').checked = true;
+  $("upWrap").classList.add("hidden"); $("upBar").style.width = "0";
+}
+
+const extOf = (f) => (f.blob.name && f.blob.name.includes(".")) ? f.blob.name.split(".").pop().toLowerCase()
+  : ({ "audio/mp4": "m4a", "audio/webm": "webm", "audio/ogg": "ogg" }[(f.blob.type || "").split(";")[0]] || "bin");
+
+$("submitReq").onclick = async () => {
+  stopRec();
+  const description = $("desc").value.trim();
+  if (description.length < 10) return say("reqMsg", "اكتب وصف المشكلة بشكل أوضح (10 أحرف على الأقل).", true);
+  const replyType = document.querySelector('input[name="reply"]:checked').value;
+  const user = auth.currentUser;
+  const reqRef = doc(collection(db, "requests"));
+  $("submitReq").disabled = true; say("reqMsg", "");
+  try {
+    const attachments = [];
+    if (files.length) {
+      $("upWrap").classList.remove("hidden");
+      const total = files.reduce((s, f) => s + f.blob.size, 0); const done = new Array(files.length).fill(0);
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const path = `requests/${user.uid}/${reqRef.id}/${i + 1}-${f.kind}.${extOf(f)}`;
+        const type = (f.blob.type || (f.kind === "audio" ? "audio/mp4" : f.kind + "/*")).split(";")[0];
+        $("upText").textContent = `جاري رفع المرفق ${i + 1} من ${files.length}…`;
+        await new Promise((res, rej) => {
+          const task = uploadBytesResumable(ref(storage, path), f.blob, { contentType: type });
+          task.on("state_changed", s => { done[i] = s.bytesTransferred; $("upBar").style.width = Math.round(done.reduce((a, b) => a + b, 0) / total * 100) + "%"; }, rej, res);
+        });
+        attachments.push({ kind: f.kind, path, contentType: type, size: f.blob.size, ...(f.dur ? { duration: f.dur } : {}) });
+      }
+      $("upText").textContent = "تم رفع المرفقات.";
+    }
+    await setDoc(reqRef, {
+      uid: user.uid, phone: user.phoneNumber,
+      customerName: profileData.name, city: profileData.city || "", car: profileData.car,
+      description, replyType, price: replyType === "call" ? 45 : 25,
+      attachments, status: "new", paid: false, createdAt: serverTimestamp()
+    });
+    resetRequest(); show("sent");
+  } catch (e) {
+    console.error(e);
+    say("reqMsg", e.code === "storage/unauthorized" ? "رفض الخادم رفع المرفق. تأكد من قواعد Storage." : "تعذّر إرسال الطلب: " + (e.code || e.message), true);
+  } finally { $("submitReq").disabled = false; }
+};
+
+$("reqBack").onclick = () => { stopRec(); show("home"); };
+$("sentHome").onclick = renderHome;
 $("editCar").onclick = openProfile;
-$("newReq").onclick = () => say("homeMsg", "صفحة إرسال الطلب هي خطوتنا القادمة.");
+$("newReq").onclick = () => { resetRequest(); show("request"); };
 $("logout").onclick = () => signOut(auth);
 </script>
 </body>
