@@ -41,6 +41,9 @@
   .btn.ghost{background:transparent;color:var(--teal-dark);height:44px;font-size:15px}
   .btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
   .msg{font-size:15px;min-height:20px}
+  .or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:14px}
+  .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+  .btn.gbtn{background:#fff;color:var(--ink);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:10px}
   .msg.err{color:var(--danger)}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .carcard{background:#fff;border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px;color:var(--ink)}
@@ -116,6 +119,11 @@
         <button id="verifyBtn" class="btn">تأكيد الدخول</button>
         <button id="backBtn" class="btn ghost">تغيير الرقم</button>
       </div>
+      <div class="or"><span>أو</span></div>
+      <button id="googleBtn" class="btn gbtn" type="button">
+        <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        الدخول بحساب Google
+      </button>
       <div id="loginMsg" class="msg" role="status"></div>
     </div>
   </section>
@@ -138,6 +146,7 @@
         <label for="vin">رقم الهيكل (VIN)</label>
         <input id="vin" type="text" maxlength="17" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="17 خانة — تجده في استمارة السيارة" style="direction:ltr;text-align:left;letter-spacing:1px">
       </div>
+      <div class="field"><label for="contactPhone">رقم الجوال للتواصل</label><div class="phone"><span>+966</span><input id="contactPhone" type="tel" inputmode="numeric" placeholder="5XXXXXXXX" autocomplete="tel"></div></div>
       <div class="field"><label for="city">المدينة</label><input id="city" type="text" placeholder="مثال: جدة"></div>
       <button id="saveBtn" class="btn">حفظ والمتابعة</button>
       <div id="profileMsg" class="msg" role="status"></div>
@@ -227,8 +236,8 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 // تخزين المرفقات على Cloudinary (مؤقتًا بدل Firebase Storage)
 const CLOUD_NAME = "p0nihtda";
 const UPLOAD_PRESET = "siyanati_unsigned";
@@ -369,19 +378,40 @@ $("verifyBtn").onclick = async () => {
 
 $("backBtn").onclick = () => { $("stepCode").classList.add("hidden"); $("stepPhone").classList.remove("hidden"); say("loginMsg", ""); };
 
+$("googleBtn").onclick = async () => {
+  say("loginMsg", "");
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    console.error(e);
+    const m = e.code === "auth/popup-blocked" ? "المتصفح منع نافذة الدخول. اسمح بالنوافذ المنبثقة وحاول مرة ثانية."
+            : e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request" ? ""
+            : e.code === "auth/operation-not-allowed" ? "الدخول بحساب Google غير مفعّل في Firebase."
+            : e.code === "auth/unauthorized-domain" ? "هذا النطاق غير مضاف في Firebase (Authorized domains)."
+            : "تعذّر الدخول بحساب Google: " + (e.code || e.message) + (window.navigator.standalone ? " — جرّب من Safari مباشرة." : "");
+    say("loginMsg", m, !!m);
+  }
+};
+
 onAuthStateChanged(auth, async user => {
   if (!user) return show("login");
   try {
     const snap = await getDoc(doc(db, "users", user.uid));
     profileData = snap.exists() ? snap.data() : null;
     if (profileData?.role === "advisor") return location.replace("advisor.html");
-    profileData && profileData.car ? renderHome() : openProfile();
+    profileData && profileData.car && (profileData.phone || user.phoneNumber) ? renderHome() : openProfile();
   } catch (e) { console.error(e); openProfile(); say("profileMsg", "تعذّر قراءة بياناتك: " + (e.code || e.message), true); }
 });
 
 function openProfile(){
   const p = profileData || {};
-  $("name").value = p.name || "";
+  const u = auth.currentUser;
+  $("name").value = p.name || u?.displayName || "";
+  const ph = (p.phone || u?.phoneNumber || "").replace(/^\+966/, "");
+  $("contactPhone").value = ph;
+  $("contactPhone").readOnly = !!u?.phoneNumber;
   const make = p.car?.make || "";
   if (!make) $("make").value = "";
   else if (CARS[make]) $("make").value = make;
@@ -402,11 +432,14 @@ $("saveBtn").onclick = async () => {
     car: { make, model: $("model").value.trim(), year: Number($("year").value), vin }
   };
   if (!data.name || !make || !data.car.model || !data.car.year) return say("profileMsg", "عبّئ الاسم ونوع السيارة والموديل وسنة الصنع.", true);
+  const contact = auth.currentUser.phoneNumber || normalizePhone($("contactPhone").value);
+  if (!contact) return say("profileMsg", "اكتب رقم جوال سعودي صحيح للتواصل (يبدأ بـ 5).", true);
+  data.phone = contact;
   if (vin && !/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) return say("profileMsg", "رقم الهيكل يتكون من 17 خانة (أرقام وحروف إنجليزية بدون I و O و Q).", true);
   $("saveBtn").disabled = true; say("profileMsg", "جاري الحفظ…");
   try {
     const user = auth.currentUser;
-    await setDoc(doc(db, "users", user.uid), { ...data, phone: user.phoneNumber, role: profileData?.role || "customer", updatedAt: serverTimestamp() }, { merge: true });
+    await setDoc(doc(db, "users", user.uid), { ...data, email: user.email || null, role: profileData?.role || "customer", updatedAt: serverTimestamp() }, { merge: true });
     profileData = { ...profileData, ...data };
     say("profileMsg", ""); renderHome();
   } catch (e) { say("profileMsg", "تعذّر الحفظ: " + (e.code || e.message), true); }
@@ -426,7 +459,7 @@ const STATUS = { new: ["بانتظار المستشار", "wait"], accepted: ["�
 async function loadMyRequests(){
   try {
     const snap = await getDocs(query(collection(db, "requests"), where("uid", "==", auth.currentUser.uid)));
-    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => !r.hiddenByCustomer)
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     const box = $("myReqs");
     if (!list.length) { box.innerHTML = '<div class="note">ما عندك استشارات للحين.</div>'; return; }
@@ -457,6 +490,18 @@ async function loadMyRequests(){
           ans.appendChild(l);
         }
         el.appendChild(ans);
+      }
+      if (r.status === "answered" || r.status === "closed") {
+        const del = document.createElement("button");
+        del.type = "button"; del.textContent = "حذف من القائمة";
+        del.style.cssText = "align-self:flex-start;margin-top:6px;border:none;background:none;color:var(--danger);font:inherit;font-size:14px;font-weight:700;cursor:pointer;min-height:36px;padding:0";
+        del.onclick = async () => {
+          if (!confirm("حذف هذه الاستشارة من قائمتك؟")) return;
+          del.disabled = true;
+          try { await updateDoc(doc(db, "requests", r.id), { hiddenByCustomer: true }); el.remove(); if (!box.children.length) box.innerHTML = '<div class="note">ما عندك استشارات للحين.</div>'; }
+          catch (e) { alert("تعذّر الحذف: " + (e.code || e.message)); del.disabled = false; }
+        };
+        el.appendChild(del);
       }
       box.appendChild(el);
     }
@@ -556,7 +601,7 @@ $("submitReq").onclick = async () => {
       $("upText").textContent = "تم رفع المرفقات.";
     }
     await setDoc(reqRef, {
-      uid: user.uid, phone: user.phoneNumber,
+      uid: user.uid, phone: profileData.phone || user.phoneNumber || "",
       customerName: profileData.name, city: profileData.city || "", car: profileData.car,
       description, replyType, price: replyType === "call" ? 45 : 25,
       attachments, status: "new", paid: false, createdAt: serverTimestamp()

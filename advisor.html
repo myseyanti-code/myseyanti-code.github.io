@@ -122,7 +122,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCFGwmvvvG2skW-c9KdwPWchcD-x-ahOfM",
@@ -254,7 +254,14 @@ function renderDetail(){
     d.innerHTML = head + `<section class="card"><h3>ردّك المرسل</h3><div class="answered">
       <b>التشخيص:</b> ${esc(a.diagnosis)}<br><b>الحل:</b> ${esc(a.solution)}<br>
       <b>التكلفة التقريبية:</b> ${esc(a.costFrom)} – ${esc(a.costTo)} ر.س<br><b>الأهمية:</b> ${esc(a.urgency)}<br>
-      <b>المركز:</b> ${esc(a.centerName)} ${a.centerMap ? `<a href="${esc(a.centerMap)}" target="_blank" rel="noopener">الموقع</a>` : ""}</div></section>`;
+      <b>المركز:</b> ${esc(a.centerName)} ${a.centerMap ? `<a href="${esc(a.centerMap)}" target="_blank" rel="noopener">الموقع</a>` : ""}</div>
+      <div class="row" style="justify-content:flex-end;margin-top:12px"><button id="delReq" class="btn ghost" style="color:var(--danger);border-color:var(--danger)">حذف الطلب نهائيًا</button></div></section>`;
+    $("delReq").onclick = async () => {
+      if (!confirm("حذف هذا الطلب نهائيًا من النظام؟ ما يمكن التراجع عنه.")) return;
+      $("delReq").disabled = true;
+      try { await deleteDoc(doc(db, "requests", r.id)); current = null; $("detail").innerHTML = '<div class="card empty">تم حذف الطلب.</div>'; loadList(); }
+      catch (e) { alert("تعذّر الحذف: " + (e.code || e.message)); $("delReq").disabled = false; }
+    };
     return;
   }
 
