@@ -139,6 +139,11 @@ const $ = id => document.getElementById(id);
 const show = id => ["splash","login","pending","dash"].forEach(s => $(s).classList.toggle("hidden", s !== id));
 const say = (el, t, err=false) => { $(el).textContent = t; $(el).classList.toggle("err", err); };
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const fmtPhone = p => {
+  const m = String(p || "").match(/^\+966(5\d)(\d{3})(\d{4})$/);
+  return m ? `+966 ${m[1]} ${m[2]} ${m[3]}` : String(p || "");
+};
+const ltr = t => "\u2066" + t + "\u2069"; // عزل النص من اليسار لليمين
 const fmtDate = ts => ts ? new Date(ts.seconds * 1000).toLocaleString("ar-SA", { dateStyle: "medium", timeStyle: "short" }) : "";
 
 // ===== الدخول =====
@@ -179,9 +184,9 @@ async function checkRole(user){
   try {
     const ref = doc(db, "users", user.uid);
     let snap = await getDoc(ref);
-    if (!snap.exists()) { await setDoc(ref, { phone: user.phoneNumber, role: "customer", createdAt: serverTimestamp() }); snap = await getDoc(ref); }
+    if (!snap.exists()) { await setDoc(ref, { phone: user.phoneNumber || null, email: user.email || null, role: "customer", createdAt: serverTimestamp() }); snap = await getDoc(ref); }
     me = { uid: user.uid, ...snap.data() };
-    $("who").textContent = me.name || user.phoneNumber;
+    $("who").textContent = me.name || user.displayName || (user.phoneNumber ? ltr(fmtPhone(user.phoneNumber)) : (user.email || ""));
     if (me.role !== "advisor") return location.replace("index.html");
     show("dash"); loadList();
   } catch (e) { console.error(e); show("pending"); $("myUid").value = user.uid; }
@@ -234,7 +239,7 @@ function renderDetail(){
       <div><h2>${esc(r.customerName)}</h2>
         <small style="color:var(--muted)">${esc(car.make)} ${esc(car.model)} · ${esc(car.year)}${car.vin ? " · الهيكل " + esc(car.vin) : ""} · ${esc(r.city)}</small></div>
       <div class="row">
-        <a class="btn ghost" style="display:flex;align-items:center;text-decoration:none" href="tel:${esc(r.phone)}">اتصال ${esc(r.phone)}</a>
+        <a class="btn ghost" style="display:flex;align-items:center;text-decoration:none" href="tel:${esc(r.phone)}">اتصال&nbsp;<bdi dir="ltr">${esc(fmtPhone(r.phone))}</bdi></a>
         ${r.status === "new" ? '<button id="accept" class="btn dark">قبول الطلب</button>' : ""}
       </div>
     </div>
