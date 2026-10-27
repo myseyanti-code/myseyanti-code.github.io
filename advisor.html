@@ -135,6 +135,13 @@ const fmtDate = ts => ts ? new Date(ts.seconds * 1000).toLocaleString("ar-SA", {
 
 // ===== الدخول =====
 let verifier, confirmation, me = null, current = null, tab = "new";
+function resetRecaptcha(){
+  try { if (verifier) verifier.clear(); } catch {}
+  verifier = null;
+  const old = document.getElementById("recaptcha");
+  const fresh = document.createElement("div"); fresh.id = "recaptcha";
+  old.replaceWith(fresh);
+}
 function normalizePhone(v){ let d = v.replace(/\D/g,""); if (d.startsWith("966")) d = d.slice(3); if (d.startsWith("0")) d = d.slice(1); return /^5\d{8}$/.test(d) ? "+966" + d : null; }
 
 $("sendBtn").onclick = async () => {
@@ -145,7 +152,7 @@ $("sendBtn").onclick = async () => {
     if (!verifier) verifier = new RecaptchaVerifier(auth, "recaptcha", { size: "invisible" });
     confirmation = await signInWithPhoneNumber(auth, phone, verifier);
     $("stepPhone").classList.add("hidden"); $("stepCode").classList.remove("hidden"); say("loginMsg", "");
-  } catch (e) { say("loginMsg", "تعذّر الإرسال: " + (e.code || e.message), true); if (verifier) { verifier.clear(); verifier = null; } }
+  } catch (e) { say("loginMsg", "تعذّر الإرسال: " + (e.code || e.message), true); resetRecaptcha(); }
   finally { $("sendBtn").disabled = false; }
 };
 $("verifyBtn").onclick = async () => {

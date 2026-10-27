@@ -311,6 +311,13 @@ $("vin").oninput = e => { e.target.value = e.target.value.toUpperCase().replace(
 
 let verifier, confirmation, profileData = null;
 
+function resetRecaptcha(){
+  try { if (verifier) verifier.clear(); } catch {}
+  verifier = null;
+  const old = document.getElementById("recaptcha");
+  const fresh = document.createElement("div"); fresh.id = "recaptcha";
+  old.replaceWith(fresh);
+}
 function normalizePhone(v){
   let d = v.replace(/\D/g, "");
   if (d.startsWith("966")) d = d.slice(3);
@@ -333,7 +340,7 @@ $("sendBtn").onclick = async () => {
             : e.code === "auth/unauthorized-domain" ? "هذا النطاق غير مضاف في Firebase (Authorized domains)."
             : "تعذّر إرسال الرمز: " + (e.code || e.message);
     say("loginMsg", m, true);
-    if (verifier) { verifier.clear(); verifier = null; }
+    resetRecaptcha();
   } finally { $("sendBtn").disabled = false; }
 };
 
