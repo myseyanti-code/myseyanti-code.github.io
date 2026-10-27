@@ -207,15 +207,21 @@ async function loadList(){
     const snap = await getDocs(query(collection(db, "requests"), where("status", "==", tab)));
     let list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (tab === "accepted") list = list.filter(r => r.advisorUid === me.uid);
+    if (tab === "answered") {
+      const mine = list.filter(r => r.advisorUid === me.uid && r.rating);
+      const avg = mine.length ? (mine.reduce((a, r) => a + r.rating.stars, 0) / mine.length).toFixed(1) : null;
+      $("who").dataset.avg = avg || "";
+      box.dataset.avg = avg ? `متوسط تقييمك: ★ ${avg} من ${mine.length} تقييم` : "";
+    }
     list.sort((a, b) => (tab === "new" ? 1 : -1) * ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)));
     if (!list.length) { box.innerHTML = '<div class="empty">لا توجد طلبات هنا.</div>'; return; }
-    box.innerHTML = "";
+    box.innerHTML = box.dataset.avg && tab === "answered" ? `<div class="card" style="padding:12px 14px;font-weight:800;color:#8A4B0B;background:#FFF7E6">${esc(box.dataset.avg)}</div>` : "";
     for (const r of list) {
       const el = document.createElement("button"); el.className = "item" + (current?.id === r.id ? " on" : "");
       el.innerHTML = `<b>${esc(r.description.length > 60 ? r.description.slice(0, 60) + "…" : r.description)}</b>
         <small>${esc(r.customerName)} · ${esc(r.car?.make)} ${esc(r.car?.model)} ${esc(r.car?.year)}</small>
         <div class="row"><span class="tag ${r.replyType === "call" ? "call" : ""}">${r.replyType === "call" ? "مكالمة صوتية" : "محادثة كتابية"}</span>
-        <small>${(r.attachments || []).length} مرفقات · ${fmtDate(r.createdAt)}</small></div>`;
+        <small>${(r.attachments || []).length} مرفقات · ${fmtDate(r.createdAt)}</small>${r.rating ? `<span style="color:#E8A317;font-weight:800">★ ${r.rating.stars}</span>` : ""}</div>`;
       el.onclick = () => { current = r; renderDetail(); loadList(); };
       box.appendChild(el);
     }
@@ -253,7 +259,8 @@ function renderDetail(){
 
   if (r.status === "answered") {
     const a = r.answer || {};
-    d.innerHTML = head + `<section class="card"><h3>ردّك المرسل</h3><div class="answered">
+    const rt = r.rating ? `<div class="answered" style="background:#FFF7E6;margin-bottom:12px"><b>تقييم العميل:</b> <span style="color:#E8A317;font-size:20px;letter-spacing:2px">${"★".repeat(r.rating.stars)}${"☆".repeat(5 - r.rating.stars)}</span>${r.rating.comment ? "<br>" + esc(r.rating.comment) : ""}</div>` : '<small style="color:var(--muted);display:block;margin-bottom:10px">لم يقيّم العميل بعد.</small>';
+    d.innerHTML = head + `<section class="card"><h3>ردّك المرسل</h3>${rt}<div class="answered">
       <b>التشخيص:</b> ${esc(a.diagnosis)}<br><b>الحل:</b> ${esc(a.solution)}<br>
       <b>التكلفة التقريبية:</b> ${esc(a.costFrom)} – ${esc(a.costTo)} ر.س<br><b>الأهمية:</b> ${esc(a.urgency)}<br>
       <b>المركز:</b> ${esc(a.centerName)} ${a.centerPhone ? `· <bdi dir="ltr">${esc(fmtPhone(a.centerPhone))}</bdi>` : ""} ${a.centerMap ? `<a href="${esc(a.centerMap)}" target="_blank" rel="noopener">الموقع</a>` : ""}</div>

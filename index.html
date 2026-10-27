@@ -497,6 +497,7 @@ async function loadMyRequests(){
         }
         el.appendChild(ans);
       }
+      if (r.status === "answered" && r.answer) el.appendChild(ratingBox(r));
       if (r.status === "answered" || r.status === "closed") {
         const del = document.createElement("button");
         del.type = "button"; del.textContent = "حذف من القائمة";
@@ -512,6 +513,42 @@ async function loadMyRequests(){
       box.appendChild(el);
     }
   } catch (e) { console.error(e); $("myReqs").innerHTML = '<div class="note">تعذّر تحميل استشاراتك.</div>'; }
+}
+
+// ===== تقييم الاستشارة =====
+const starsText = n => "★".repeat(n) + "☆".repeat(5 - n);
+function ratingBox(r){
+  const w = document.createElement("div");
+  w.style.cssText = "border-top:1px solid var(--line);margin-top:8px;padding-top:10px;display:flex;flex-direction:column;gap:8px";
+  if (r.rating) {
+    w.innerHTML = '<div style="font-size:15px"><b>تقييمك:</b> <span style="color:#E8A317;font-size:20px;letter-spacing:2px"></span></div>';
+    w.querySelector("span").textContent = starsText(r.rating.stars);
+    if (r.rating.comment) { const c = document.createElement("div"); c.style.cssText = "font-size:14px;color:var(--muted)"; c.textContent = r.rating.comment; w.appendChild(c); }
+    return w;
+  }
+  let chosen = 0;
+  w.innerHTML = `<b style="font-size:15px">كيف كانت الاستشارة؟</b>
+    <div class="stars" role="radiogroup" aria-label="التقييم" style="display:flex;gap:4px;direction:ltr;justify-content:flex-end"></div>
+    <textarea placeholder="ملاحظة للمستشار (اختياري)" style="min-height:70px"></textarea>
+    <button type="button" class="btn" style="height:46px;font-size:16px" disabled>إرسال التقييم</button>`;
+  const row = w.querySelector(".stars"), ta = w.querySelector("textarea"), send = w.querySelector("button.btn");
+  const paint = () => row.querySelectorAll("button").forEach((b, i) => { b.textContent = i < chosen ? "★" : "☆"; b.setAttribute("aria-checked", i + 1 === chosen); });
+  for (let i = 1; i <= 5; i++) {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-label", i + " من 5");
+    b.style.cssText = "border:none;background:none;font-size:34px;line-height:1;color:#E8A317;cursor:pointer;min-width:44px;min-height:44px;padding:0";
+    b.onclick = () => { chosen = i; paint(); send.disabled = false; };
+    row.appendChild(b);
+  }
+  paint();
+  send.onclick = async () => {
+    send.disabled = true; send.textContent = "جاري الإرسال…";
+    try {
+      const rating = { stars: chosen, comment: ta.value.trim().slice(0, 500), ratedAt: serverTimestamp() };
+      await updateDoc(doc(db, "requests", r.id), { rating });
+      w.replaceWith(ratingBox({ ...r, rating: { stars: chosen, comment: rating.comment } }));
+    } catch (e) { alert("تعذّر إرسال التقييم: " + (e.code || e.message)); send.disabled = false; send.textContent = "إرسال التقييم"; }
+  };
+  return w;
 }
 
 // ===== إرسال الطلب =====
