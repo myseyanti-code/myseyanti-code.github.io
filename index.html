@@ -484,6 +484,12 @@ async function loadMyRequests(){
         }
         line("درجة الأهمية", a.urgency);
         line("المركز المُرشَّح", a.centerName);
+        if (a.centerPhone) {
+          const t = document.createElement("a"); t.href = "tel:" + a.centerPhone;
+          t.textContent = "اتصال بالمركز \u2066" + a.centerPhone.replace(/^\+966(5\d)(\d{3})(\d{4})$/, "+966 $1 $2 $3") + "\u2069";
+          t.style.cssText = "color:var(--teal-dark);font-weight:800";
+          ans.appendChild(t);
+        }
         if (a.centerMap && /^https?:\/\//.test(a.centerMap)) {
           const l = document.createElement("a"); l.href = a.centerMap; l.target = "_blank"; l.rel = "noopener";
           l.textContent = "عرض موقع المركز على الخريطة"; l.style.cssText = "color:var(--teal-dark);font-weight:800";
