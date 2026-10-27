@@ -172,6 +172,7 @@
       <div id="homeMsg" class="msg" role="status"></div>
       <h2>كيف تعمل الخدمة؟</h2>
       <div class="steps"><div><i>١</i>وصف المشكلة</div><div><i>٢</i>استشارة المستشار</div><div><i>٣</i>التوجه لمركز موثوق</div></div>
+      <button id="notifBtn" class="btn ghost hidden" type="button" style="border:1.5px dashed var(--teal);height:48px">🔔 فعّل التنبيهات عشان يوصلك رد المستشار</button>
       <h2>استشاراتي</h2>
       <div id="myReqs" style="display:flex;flex-direction:column;gap:10px"><div class="note">ما عندك استشارات للحين.</div></div>
       <button id="logout" class="btn ghost">تسجيل الخروج</button>
@@ -237,7 +238,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 // تخزين المرفقات على Cloudinary (مؤقتًا بدل Firebase Storage)
 const CLOUD_NAME = "p0nihtda";
 const UPLOAD_PRESET = "siyanati_unsigned";
@@ -452,7 +453,61 @@ function renderHome(){
   $("carYear").textContent = "سنة الصنع " + profileData.car.year + (profileData.car.vin ? " · الهيكل …" + profileData.car.vin.slice(-6) : "");
   show("home");
   loadMyRequests();
+  startWatch();
+  $("notifBtn").classList.toggle("hidden", !(canNotify() && Notification.permission === "default"));
 }
+
+// ===== التنبيهات =====
+let swReg = null;
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").then(r => swReg = r).catch(() => {});
+const canNotify = () => "Notification" in window;
+async function askNotify(btn){
+  if (!canNotify()) { alert("التنبيهات تحتاج فتح «صيانتي» من أيقونة الشاشة الرئيسية (على آيفون/آيباد)."); return; }
+  const p = await Notification.requestPermission();
+  if (btn) btn.classList.toggle("hidden", p !== "default");
+  if (p === "granted") notify("تم تفعيل التنبيهات ✓", "بيوصلك تنبيه هنا عند كل جديد.");
+}
+function notify(title, body, url = location.pathname){
+  try {
+    if (canNotify() && Notification.permission === "granted") {
+      const opt = { body, icon: "icon-192.png", badge: "icon-192.png", lang: "ar", dir: "rtl", data: { url } };
+      swReg ? swReg.showNotification(title, opt) : new Notification(title, opt);
+    }
+  } catch (e) { console.warn(e); }
+  toast(title + (body ? " — " + body : ""));
+}
+function toast(text){
+  const t = document.createElement("div");
+  t.setAttribute("role", "status");
+  t.textContent = text;
+  t.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));z-index:50;background:#0E2A2F;color:#fff;padding:12px 18px;border-radius:14px;font:700 15px Tajawal,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:92vw;text-align:center";
+  document.body.appendChild(t); setTimeout(() => t.remove(), 5000);
+}
+function beep(){
+  try { const a = new (window.AudioContext || window.webkitAudioContext)(); const o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = 880; g.gain.value = 0.08; o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + 0.25); } catch {}
+}
+const setBadge = n => { try { n ? navigator.setAppBadge?.(n) : navigator.clearAppBadge?.(); } catch {} };
+
+let unwatch = null, lastSig = null, lastStatus = {};
+function startWatch(){
+  if (unwatch) return;
+  unwatch = onSnapshot(query(collection(db, "requests"), where("uid", "==", auth.currentUser.uid)), snap => {
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const sig = list.map(r => r.id + r.status + (r.hiddenByCustomer ? 1 : 0)).sort().join("|");
+    if (lastSig !== null) {
+      for (const r of list) {
+        const before = lastStatus[r.id];
+        if (before && before !== "answered" && r.status === "answered") { notify("وصل رد المستشار 🎉", r.description.slice(0, 60)); beep(); }
+        else if (before === "new" && r.status === "accepted") toast("المستشار استلم طلبك ويراجعه الآن");
+      }
+      if (sig !== lastSig && !$("home").classList.contains("hidden")) loadMyRequests();
+    }
+    lastSig = sig; lastStatus = Object.fromEntries(list.map(r => [r.id, r.status]));
+    setBadge(list.filter(r => r.status === "answered" && !r.rating && !r.hiddenByCustomer).length);
+  }, e => console.warn(e));
+}
+$("notifBtn").onclick = () => askNotify($("notifBtn"));
 
 // ===== قائمة استشاراتي =====
 const STATUS = { new: ["بانتظار المستشار", "wait"], accepted: ["قيد المتابعة", "wait"], answered: ["تم الرد", ""], closed: ["مكتملة", ""] };
@@ -660,7 +715,7 @@ $("reqBack").onclick = () => { stopRec(); show("home"); };
 $("sentHome").onclick = renderHome;
 $("editCar").onclick = openProfile;
 $("newReq").onclick = () => { resetRequest(); show("request"); };
-$("logout").onclick = () => signOut(auth);
+$("logout").onclick = () => { if (unwatch) { unwatch(); unwatch = null; lastSig = null; } setBadge(0); signOut(auth); };
 </script>
 </body>
 </html>

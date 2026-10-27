@@ -67,7 +67,7 @@
     <svg width="34" height="34" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/><g transform="translate(18 6.5) scale(3.5)" fill="none" stroke="#0B8A87" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></g></svg>
     صيانتي · لوحة المستشار
   </div>
-  <div class="row"><span id="who"></span><button id="logout" class="hidden">خروج</button></div>
+  <div class="row"><button id="notifBtn" class="hidden" type="button">🔔 فعّل التنبيهات</button><span id="who"></span><button id="logout" class="hidden">خروج</button></div>
 </header>
 
 <!-- التحميل -->
@@ -123,7 +123,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, collection, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCFGwmvvvG2skW-c9KdwPWchcD-x-ahOfM",
@@ -189,9 +189,67 @@ async function checkRole(user){
     me = { uid: user.uid, ...snap.data() };
     $("who").textContent = me.name || user.displayName || (user.phoneNumber ? ltr(fmtPhone(user.phoneNumber)) : (user.email || ""));
     if (me.role !== "advisor") return location.replace("index.html");
-    show("dash"); loadList();
+    show("dash"); loadList(); startWatch();
+    $("notifBtn").classList.toggle("hidden", !(canNotify() && Notification.permission === "default"));
   } catch (e) { console.error(e); show("pending"); $("myUid").value = user.uid; }
 }
+
+
+// ===== التنبيهات =====
+let swReg = null;
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").then(r => swReg = r).catch(() => {});
+const canNotify = () => "Notification" in window;
+async function askNotify(btn){
+  if (!canNotify()) { alert("التنبيهات تحتاج فتح «صيانتي» من أيقونة الشاشة الرئيسية (على آيفون/آيباد)."); return; }
+  const p = await Notification.requestPermission();
+  if (btn) btn.classList.toggle("hidden", p !== "default");
+  if (p === "granted") notify("تم تفعيل التنبيهات ✓", "بيوصلك تنبيه هنا عند كل جديد.");
+}
+function notify(title, body, url = location.pathname){
+  try {
+    if (canNotify() && Notification.permission === "granted") {
+      const opt = { body, icon: "icon-192.png", badge: "icon-192.png", lang: "ar", dir: "rtl", data: { url } };
+      swReg ? swReg.showNotification(title, opt) : new Notification(title, opt);
+    }
+  } catch (e) { console.warn(e); }
+  toast(title + (body ? " — " + body : ""));
+}
+function toast(text){
+  const t = document.createElement("div");
+  t.setAttribute("role", "status");
+  t.textContent = text;
+  t.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));z-index:50;background:#0E2A2F;color:#fff;padding:12px 18px;border-radius:14px;font:700 15px Tajawal,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:92vw;text-align:center";
+  document.body.appendChild(t); setTimeout(() => t.remove(), 5000);
+}
+function beep(){
+  try { const a = new (window.AudioContext || window.webkitAudioContext)(); const o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = 880; g.gain.value = 0.08; o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + 0.25); } catch {}
+}
+const setBadge = n => { try { n ? navigator.setAppBadge?.(n) : navigator.clearAppBadge?.(); } catch {} };
+
+let unwatch = null, known = null;
+function startWatch(){
+  if (unwatch) return;
+  unwatch = onSnapshot(query(collection(db, "requests"), where("status", "==", "new")), snap => {
+    const ids = snap.docs.map(d => d.id);
+    const n = ids.length;
+    const tabBtn = document.querySelector('.tabs button[data-st="new"]');
+    tabBtn.textContent = n ? `جديدة (${n})` : "جديدة";
+    document.title = (n ? `(${n}) ` : "") + "صيانتي · لوحة المستشار";
+    setBadge(n);
+    if (known) {
+      const fresh = snap.docs.filter(d => !known.has(d.id));
+      if (fresh.length) {
+        const r = fresh[0].data();
+        notify(fresh.length > 1 ? `${fresh.length} طلبات جديدة` : "طلب استشارة جديد", `${r.customerName || ""} · ${r.car?.make || ""} ${r.car?.model || ""}`);
+        beep();
+        if (tab === "new") loadList();
+      }
+    }
+    known = new Set(ids);
+  }, e => console.warn(e));
+}
+$("notifBtn").onclick = () => askNotify($("notifBtn"));
 
 // ===== القائمة =====
 document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
