@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B8A87">
 <title>صيانتي</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="صيانتي">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -82,7 +89,7 @@
 
   <!-- شاشة التحميل -->
   <section id="splash" style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
-    <svg width="72" height="72" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#0B8A87"/><path d="M26 70H94V61Q94 55 88 54L81 53 71 40H47L37 53 32 54Q26 55 26 61Z" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><circle cx="43" cy="70" r="8" fill="#0B8A87" stroke="#fff" stroke-width="6"/><circle cx="77" cy="70" r="8" fill="#0B8A87" stroke="#fff" stroke-width="6"/></svg>
+    <svg width="72" height="72" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#0B8A87"/><g transform="translate(18 6.5) scale(3.5)" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></g></svg>
     <div style="font-size:24px;font-weight:800;color:#0E2A2F">صيانتي</div>
     <div style="font-size:14px;color:#4A6266">جاري التحميل…</div>
   </section>
@@ -91,7 +98,7 @@
   <section id="login" class="hidden">
     <div class="hero">
       <div class="brand">
-        <svg width="40" height="40" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/><path d="M26 70H94V61Q94 55 88 54L81 53 71 40H47L37 53 32 54Q26 55 26 61Z" fill="none" stroke="#0B8A87" stroke-width="6" stroke-linejoin="round"/><circle cx="43" cy="70" r="8" fill="#fff" stroke="#0B8A87" stroke-width="6"/><circle cx="77" cy="70" r="8" fill="#fff" stroke="#0B8A87" stroke-width="6"/></svg>
+        <svg width="40" height="40" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/><g transform="translate(18 6.5) scale(3.5)" fill="none" stroke="#0B8A87" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></g></svg>
         صيانتي
       </div>
       <h1>مستشارك الموثوق لسيارتك</h1>
@@ -143,7 +150,7 @@
       <div class="brand" style="font-size:22px">صيانتي</div>
       <h1 id="hello">أهلًا</h1>
       <div class="carcard">
-        <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0B8A87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14v-4l-2-5H7l-2 5z"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg></div>
+        <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0B8A87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></div>
         <div style="flex:1"><b id="carName"></b><small id="carYear"></small></div>
         <button id="editCar" class="btn ghost" style="width:auto;padding:0 8px">تعديل</button>
       </div>
@@ -438,7 +445,10 @@ async function loadMyRequests(){
         const line = (label, val) => { if (!val) return; const p = document.createElement("div"); const b = document.createElement("b"); b.textContent = label + ": "; p.append(b, document.createTextNode(val)); ans.appendChild(p); };
         line("التشخيص", a.diagnosis);
         line("الحل المقترح", a.solution);
-        if (a.costFrom || a.costTo) line("التكلفة التقريبية", `${a.costFrom || 0} – ${a.costTo || a.costFrom} ر.س`);
+        if (a.costFrom || a.costTo) {
+          const lo = a.costFrom || a.costTo, hi = a.costTo || a.costFrom;
+          line("التكلفة التقريبية", lo === hi ? `${lo} ر.س` : `${lo} – ${hi} ر.س`);
+        }
         line("درجة الأهمية", a.urgency);
         line("المركز المُرشَّح", a.centerName);
         if (a.centerMap && /^https?:\/\//.test(a.centerMap)) {
