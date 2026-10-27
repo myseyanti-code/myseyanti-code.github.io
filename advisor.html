@@ -110,6 +110,7 @@
         <button data-st="accepted">قيد المتابعة</button>
         <button data-st="answered">تم الرد</button>
         <button data-st="centers">المراكز</button>
+        <button data-st="settings">إعدادات الدفع</button>
       </div>
       <button id="refresh" class="btn ghost" style="min-height:40px">تحديث القائمة</button>
       <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -260,6 +261,7 @@ $("refresh").onclick = () => loadList();
 
 async function loadList(){
   if (tab === "centers") return loadCenters();
+  if (tab === "settings") { $("list").innerHTML = '<div class="empty">بيانات الحسابات اللي يحوّل لها العملاء.</div>'; return renderPaySettings(); }
   const box = $("list"); box.innerHTML = '<div class="empty">جاري التحميل…</div>';
   try {
     const snap = await getDocs(query(collection(db, "requests"), where("status", "==", tab)));
@@ -278,7 +280,7 @@ async function loadList(){
       const el = document.createElement("button"); el.className = "item" + (current?.id === r.id ? " on" : "");
       el.innerHTML = `<b>${esc(r.description.length > 60 ? r.description.slice(0, 60) + "…" : r.description)}</b>
         <small>${esc(r.customerName)} · ${esc(r.car?.make)} ${esc(r.car?.model)} ${esc(r.car?.year)}</small>
-        <div class="row"><span class="tag ${r.replyType === "call" ? "call" : ""}">${r.replyType === "call" ? "مكالمة صوتية" : "محادثة كتابية"}</span>
+        <div class="row"><span class="tag ${r.replyType === "call" ? "call" : ""}">${r.replyType === "call" ? "مكالمة صوتية" : "محادثة كتابية"}</span>${payTag(r)}
         <small>${(r.attachments || []).length} مرفقات · ${fmtDate(r.createdAt)}</small>${r.rating ? `<span style="color:#E8A317;font-weight:800">★ ${r.rating.stars}</span>` : ""}</div>`;
       el.onclick = () => { current = r; renderDetail(); loadList(); };
       box.appendChild(el);
@@ -313,6 +315,7 @@ function renderDetail(){
     <div class="desc">${esc(r.description)}</div>
     <h3>المرفقات</h3>
     <div class="media">${mediaHTML(r.attachments)}</div>
+    ${payHTML(r)}
   </section>`;
 
   if (r.status === "answered") {
@@ -353,7 +356,8 @@ function renderDetail(){
       <div class="field"><label for="cph">هاتف المركز</label><input id="cph" type="tel" inputmode="tel" style="direction:ltr"></div>
       <div class="field"><label for="cm">رابط الموقع على الخريطة</label><input id="cm" type="url" placeholder="https://maps.app.goo.gl/…" style="direction:ltr"></div>
     </div>
-    <div class="row" style="justify-content:flex-end"><button id="sendAns" class="btn" ${r.status === "new" ? "disabled" : ""}>إرسال التشخيص للعميل</button></div>
+    <div class="row" style="justify-content:flex-end"><button id="sendAns" class="btn" ${r.status === "new" || !payOK(r) ? "disabled" : ""}>إرسال التشخيص للعميل</button></div>
+    ${!payOK(r) ? '<small style="color:var(--warn);font-weight:700">أكّد استلام الدفع أولًا عشان تقدر ترسل الرد.</small>' : ""}
     <div id="ansMsg" class="msg" role="status"></div>
   </section>`;
 
@@ -369,6 +373,7 @@ function renderDetail(){
   };
 
   fillCenterSelect(r.city);
+  bindPay(r);
   $("sendAns").onclick = async () => {
     const ans = { diagnosis: $("diag").value.trim(), solution: $("sol").value.trim(),
       costFrom: Number($("cf").value) || 0, costTo: Number($("ct").value) || 0, urgency: $("urg").value,
@@ -380,6 +385,79 @@ function renderDetail(){
       await updateDoc(doc(db, "requests", r.id), { status: "answered", answer: ans, answeredAt: serverTimestamp(), advisorUid: me.uid, advisorName: me.name || "" });
       current = { ...r, status: "answered", answer: ans }; renderDetail(); loadList();
     } catch (e) { say("ansMsg", "تعذّر الإرسال: " + (e.code || e.message), true); $("sendAns").disabled = false; }
+  };
+}
+
+// ===== الدفع =====
+const payOK = r => !r.payment || ["confirmed", "not_required"].includes(r.payment.status);
+function payTag(r){
+  const s = r.payment?.status;
+  if (s === "pending") return '<span class="tag call">💳 بانتظار تأكيد الدفع</span>';
+  if (s === "confirmed") return '<span class="tag">✓ مدفوع</span>';
+  if (s === "rejected") return '<span class="tag" style="background:#FDECEC;color:var(--danger)">✕ الدفع مرفوض</span>';
+  return "";
+}
+function payHTML(r){
+  const p = r.payment;
+  if (!p || p.method !== "transfer") return "";
+  return `<h3>الدفع</h3>
+    <div class="answered" style="display:flex;flex-direction:column;gap:8px">
+      <div><b>المبلغ:</b> ${esc(p.amount)} ر.س · <b>الطريقة:</b> تحويل · <b>الحالة:</b> ${payTag(r)}</div>
+      ${p.receiptUrl ? `<a href="${esc(p.receiptUrl)}" target="_blank" rel="noopener"><img src="${esc(p.receiptUrl)}" alt="إيصال التحويل" style="max-width:240px;border-radius:12px"></a>` : ""}
+      ${p.note ? `<small>ملاحظة: ${esc(p.note)}</small>` : ""}
+      ${p.status === "pending" ? '<div class="row"><button id="payOk" class="btn">تأكيد استلام المبلغ</button><button id="payNo" class="btn ghost" style="color:var(--danger);border-color:var(--danger)">رفض الإيصال</button></div>' : ""}
+    </div>`;
+}
+function bindPay(r){
+  const ok = $("payOk"), no = $("payNo");
+  if (ok) ok.onclick = async () => {
+    if (!confirm(`تأكيد وصول ${r.payment.amount} ر.س في الحساب؟`)) return;
+    ok.disabled = true;
+    try {
+      const payment = { ...r.payment, status: "confirmed", confirmedBy: me.uid, confirmedAt: new Date().toISOString() };
+      await updateDoc(doc(db, "requests", r.id), { payment, paid: true });
+      current = { ...r, payment, paid: true }; renderDetail(); loadList();
+    } catch (e) { alert("تعذّر التأكيد: " + (e.code || e.message)); ok.disabled = false; }
+  };
+  if (no) no.onclick = async () => {
+    const note = prompt("سبب الرفض (يظهر للعميل):", "المبلغ لم يصل أو الإيصال غير واضح");
+    if (note === null) return;
+    no.disabled = true;
+    try {
+      const payment = { ...r.payment, status: "rejected", note: note.trim().slice(0, 200) };
+      await updateDoc(doc(db, "requests", r.id), { payment, paid: false });
+      current = { ...r, payment, paid: false }; renderDetail(); loadList();
+    } catch (e) { alert("تعذّر الرفض: " + (e.code || e.message)); no.disabled = false; }
+  };
+}
+async function renderPaySettings(){
+  const d = $("detail"); d.innerHTML = '<div class="card empty">جاري التحميل…</div>';
+  let v = {};
+  try { const snap = await getDoc(doc(db, "config", "payment")); if (snap.exists()) v = snap.data(); } catch (e) { console.warn(e); }
+  d.innerHTML = `
+  <section class="card" style="display:flex;flex-direction:column;gap:12px">
+    <h2>إعدادات الدفع (تحويل يدوي)</h2>
+    <small style="color:var(--muted)">تظهر هذي البيانات للعميل عند إرسال الطلب، ويُطلب منه إرفاق إيصال التحويل.</small>
+    <label class="row" style="font-weight:700"><input id="p_en" type="checkbox" ${v.enabled ? "checked" : ""} style="width:20px;height:20px;accent-color:var(--teal)"> تفعيل الدفع بالتحويل (إذا أطفيته، تُرسل الطلبات بدون دفع)</label>
+    <div class="grid">
+      <div class="field"><label for="p_bank">اسم البنك</label><input id="p_bank" value="${esc(v.bankName)}" placeholder="مثال: مصرف الراجحي"></div>
+      <div class="field"><label for="p_ben">اسم المستفيد</label><input id="p_ben" value="${esc(v.beneficiary)}"></div>
+    </div>
+    <div class="field"><label for="p_iban">رقم الآيبان (IBAN)</label><input id="p_iban" value="${esc(v.iban)}" style="direction:ltr" placeholder="SA00 0000 0000 0000 0000 0000"></div>
+    <div class="field"><label for="p_stc">رقم STC Pay (اختياري)</label><input id="p_stc" value="${esc(v.stcPay)}" type="tel" style="direction:ltr" placeholder="05XXXXXXXX"></div>
+    <div class="row" style="justify-content:flex-end"><button id="p_save" class="btn">حفظ</button></div>
+    <div id="p_msg" class="msg" role="status"></div>
+  </section>`;
+  $("p_save").onclick = async () => {
+    const iban = $("p_iban").value.toUpperCase().replace(/\s/g, "");
+    const data = { enabled: $("p_en").checked, bankName: $("p_bank").value.trim(), beneficiary: $("p_ben").value.trim(),
+      iban: iban.replace(/(.{4})/g, "$1 ").trim(), stcPay: $("p_stc").value.trim(), updatedAt: serverTimestamp(), updatedBy: me.uid };
+    if (iban && !/^SA\d{22}$/.test(iban)) return say("p_msg", "الآيبان السعودي يبدأ بـ SA ويتكون من 24 خانة.", true);
+    if (data.enabled && !iban && !data.stcPay) return say("p_msg", "أضف آيبان أو رقم STC Pay قبل التفعيل.", true);
+    $("p_save").disabled = true; say("p_msg", "جاري الحفظ…");
+    try { await setDoc(doc(db, "config", "payment"), data); say("p_msg", "تم الحفظ ✓"); }
+    catch (e) { say("p_msg", "تعذّر الحفظ: " + (e.code || e.message), true); }
+    finally { $("p_save").disabled = false; }
   };
 }
 

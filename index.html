@@ -84,6 +84,13 @@
   .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;background:var(--teal-soft);color:var(--teal-dark)}
   .badge.wait{background:#FCEFD9;color:#8A4B0B}
   .note{font-size:13px;color:var(--muted);text-align:center}
+  .paycard{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .payrow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:15px}
+  .payrow b{font-size:18px;color:var(--teal-dark)}
+  .acct{background:var(--bg);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+  .acct .val{display:flex;align-items:center;justify-content:space-between;gap:8px;direction:ltr;font-weight:800;font-size:15px;word-break:break-all}
+  .acct button{border:none;background:var(--teal-soft);color:var(--teal-dark);border-radius:10px;font:inherit;font-weight:700;font-size:13px;min-height:36px;padding:0 10px;cursor:pointer;flex:none}
+  .paystate{font-size:13px;font-weight:700;border-radius:10px;padding:6px 10px;align-self:flex-start}
   .steps i{font-style:normal;width:32px;height:32px;border-radius:16px;background:var(--teal-soft);color:var(--teal);font-weight:800;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
@@ -213,9 +220,19 @@
         <label class="opt"><input type="radio" name="reply" value="chat" checked><span><b>محادثة كتابية</b><small>رد مكتوب تقرأه في أي وقت</small></span><span class="price">25 ر.س</span></label>
         <label class="opt"><input type="radio" name="reply" value="call"><span><b>مكالمة صوتية</b><small>يتصل عليك المستشار ويشرح لك</small></span><span class="price">45 ر.س</span></label>
       </fieldset>
+      <div id="payBox" class="field hidden">
+        <label>الدفع</label>
+        <div class="paycard">
+          <div class="payrow"><span>المبلغ المطلوب</span><b id="payAmount">25 ر.س</b></div>
+          <div class="note" style="text-align:right">حوّل المبلغ لأحد الحسابات التالية، ثم أرفق صورة الإيصال. يبدأ المستشار بعد تأكيد الدفع.</div>
+          <div id="payDetails"></div>
+          <button id="addReceipt" type="button" class="btn ghost" style="border:1.5px dashed var(--teal);height:50px">📎 إرفاق صورة إيصال التحويل</button>
+          <input id="receiptIn" type="file" accept="image/*" class="hidden">
+          <div id="receiptChip"></div>
+        </div>
+      </div>
       <div id="upWrap" class="field hidden"><div class="bar"><i id="upBar"></i></div><div id="upText" class="note"></div></div>
       <button id="submitReq" class="btn">أرسل الطلب</button>
-      <div class="note">نسخة تجريبية: الدفع الإلكتروني يُضاف في الخطوة القادمة.</div>
       <div id="reqMsg" class="msg" role="status"></div>
     </div>
   </section>
@@ -489,21 +506,24 @@ function beep(){
 }
 const setBadge = n => { try { n ? navigator.setAppBadge?.(n) : navigator.clearAppBadge?.(); } catch {} };
 
-let unwatch = null, lastSig = null, lastStatus = {};
+let unwatch = null, lastSig = null, lastStatus = {}, lastPay = {};
 function startWatch(){
   if (unwatch) return;
   unwatch = onSnapshot(query(collection(db, "requests"), where("uid", "==", auth.currentUser.uid)), snap => {
     const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const sig = list.map(r => r.id + r.status + (r.hiddenByCustomer ? 1 : 0)).sort().join("|");
+    const sig = list.map(r => r.id + r.status + (r.hiddenByCustomer ? 1 : 0) + (r.payment?.status || "")).sort().join("|");
     if (lastSig !== null) {
       for (const r of list) {
         const before = lastStatus[r.id];
         if (before && before !== "answered" && r.status === "answered") { notify("وصل رد المستشار 🎉", r.description.slice(0, 60)); beep(); }
         else if (before === "new" && r.status === "accepted") toast("المستشار استلم طلبك ويراجعه الآن");
+        const pb = lastPay[r.id], pa = r.payment?.status;
+        if (pb === "pending" && pa === "confirmed") notify("تم تأكيد الدفع ✓", "المستشار بيبدأ في طلبك");
+        if (pb === "pending" && pa === "rejected") notify("لم يتم تأكيد الدفع", r.payment.note || "افتح الطلب وأرفق إيصالًا جديدًا");
       }
       if (sig !== lastSig && !$("home").classList.contains("hidden")) loadMyRequests();
     }
-    lastSig = sig; lastStatus = Object.fromEntries(list.map(r => [r.id, r.status]));
+    lastSig = sig; lastStatus = Object.fromEntries(list.map(r => [r.id, r.status])); lastPay = Object.fromEntries(list.map(r => [r.id, r.payment?.status]));
     setBadge(list.filter(r => r.status === "answered" && !r.rating && !r.hiddenByCustomer).length);
   }, e => console.warn(e));
 }
@@ -552,6 +572,7 @@ async function loadMyRequests(){
         }
         el.appendChild(ans);
       }
+      if (r.payment && r.payment.method === "transfer" && r.status !== "answered") el.appendChild(payState(r));
       if (r.status === "answered" && r.answer) el.appendChild(ratingBox(r));
       if (r.status === "answered" || r.status === "closed") {
         const del = document.createElement("button");
@@ -568,6 +589,34 @@ async function loadMyRequests(){
       box.appendChild(el);
     }
   } catch (e) { console.error(e); $("myReqs").innerHTML = '<div class="note">تعذّر تحميل استشاراتك.</div>'; }
+}
+
+// ===== حالة الدفع عند العميل =====
+function payState(r){
+  const w = document.createElement("div"); w.style.cssText = "display:flex;flex-direction:column;gap:6px;margin-top:4px";
+  const st = document.createElement("span"); st.className = "paystate";
+  const p = r.payment;
+  if (p.status === "pending") { st.textContent = "💳 بانتظار تأكيد الدفع"; st.style.cssText += ";background:#FCEFD9;color:#8A4B0B"; }
+  else if (p.status === "confirmed") { st.textContent = "✓ تم تأكيد الدفع"; st.style.cssText += ";background:var(--teal-soft);color:var(--teal-dark)"; }
+  else if (p.status === "rejected") { st.textContent = "✕ لم يتم تأكيد الدفع"; st.style.cssText += ";background:#FDECEC;color:var(--danger)"; }
+  w.appendChild(st);
+  if (p.status === "rejected") {
+    if (p.note) { const n = document.createElement("small"); n.textContent = "السبب: " + p.note; w.appendChild(n); }
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost"; b.style.cssText = "height:44px;font-size:15px"; b.textContent = "📎 إرفاق إيصال جديد";
+    const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.className = "hidden";
+    b.onclick = () => inp.click();
+    inp.onchange = async () => {
+      const f = inp.files[0]; if (!f) return;
+      b.disabled = true; b.textContent = "جاري الرفع…";
+      try {
+        const up = await uploadToCloudinary(f, `siyanati/requests/${r.id}`, "receipt-" + Date.now(), () => {});
+        await updateDoc(doc(db, "requests", r.id), { payment: { ...p, status: "pending", receiptUrl: up.secure_url, note: "", submittedAt: new Date().toISOString() } });
+        toast("تم إرسال الإيصال الجديد"); loadMyRequests();
+      } catch (e) { alert("تعذّر الرفع: " + (e.code || e.message)); b.disabled = false; b.textContent = "📎 إرفاق إيصال جديد"; }
+    };
+    w.append(b, inp);
+  }
+  return w;
 }
 
 // ===== تقييم الاستشارة =====
@@ -660,8 +709,59 @@ $("recBtn").onclick = async () => {
   } catch (e) { console.error(e); say("reqMsg", "ما قدرنا نوصل للمايكروفون. اسمح للمتصفح باستخدامه من الإعدادات.", true); }
 };
 
+// ===== الدفع (تحويل يدوي مؤقت) =====
+let PAYCFG = null, receipt = null;
+const PRICES = { chat: 25, call: 45 };
+const priceOf = () => PRICES[document.querySelector('input[name="reply"]:checked').value];
+async function loadPayConfig(){
+  try {
+    const snap = await getDoc(doc(db, "config", "payment"));
+    PAYCFG = snap.exists() && snap.data().enabled ? snap.data() : null;
+  } catch (e) { console.warn(e); PAYCFG = null; }
+  $("payBox").classList.toggle("hidden", !PAYCFG);
+  if (!PAYCFG) return;
+  const box = $("payDetails"); box.innerHTML = "";
+  const acct = (title, lines, copyVal) => {
+    const a = document.createElement("div"); a.className = "acct";
+    const t = document.createElement("b"); t.textContent = title; a.appendChild(t);
+    lines.filter(Boolean).forEach(l => { const d = document.createElement("div"); d.textContent = l; a.appendChild(d); });
+    if (copyVal) {
+      const v = document.createElement("div"); v.className = "val";
+      const sp = document.createElement("span"); sp.textContent = copyVal;
+      const b = document.createElement("button"); b.type = "button"; b.textContent = "نسخ";
+      b.onclick = async () => { try { await navigator.clipboard.writeText(copyVal.replace(/\s/g, "")); b.textContent = "تم النسخ ✓"; setTimeout(() => b.textContent = "نسخ", 2000); } catch { alert(copyVal); } };
+      v.append(sp, b); a.appendChild(v);
+    }
+    box.appendChild(a);
+  };
+  if (PAYCFG.iban) acct("تحويل بنكي", [PAYCFG.bankName && "البنك: " + PAYCFG.bankName, PAYCFG.beneficiary && "اسم المستفيد: " + PAYCFG.beneficiary], PAYCFG.iban);
+  if (PAYCFG.stcPay) acct("STC Pay", [PAYCFG.beneficiary && "باسم: " + PAYCFG.beneficiary], PAYCFG.stcPay);
+}
+document.querySelectorAll('input[name="reply"]').forEach(r => r.onchange = () => $("payAmount").textContent = priceOf() + " ر.س");
+$("addReceipt").onclick = () => $("receiptIn").click();
+$("receiptIn").onchange = e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  if (f.size > 10 * 1048576) return say("reqMsg", "صورة الإيصال أكبر من 10 ميجا.", true);
+  if (receipt) URL.revokeObjectURL(receipt.url);
+  receipt = { blob: f, url: URL.createObjectURL(f) };
+  renderReceipt();
+};
+function renderReceipt(){
+  const c = $("receiptChip"); c.innerHTML = "";
+  if (!receipt) return;
+  const d = document.createElement("div"); d.className = "chip";
+  const im = document.createElement("img"); im.src = receipt.url; im.alt = "";
+  const t = document.createElement("span"); t.textContent = "إيصال التحويل";
+  const x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "حذف الإيصال");
+  x.onclick = () => { URL.revokeObjectURL(receipt.url); receipt = null; renderReceipt(); };
+  d.append(im, t, x); c.appendChild(d);
+}
+
 function resetRequest(){
   stopRec(); files.forEach(f => URL.revokeObjectURL(f.url)); files = [];
+  if (receipt) URL.revokeObjectURL(receipt.url); receipt = null; renderReceipt();
+  $("payAmount").textContent = PRICES.chat + " ر.س";
   $("desc").value = ""; renderChips(); say("reqMsg", "");
   document.querySelector('input[name="reply"][value="chat"]').checked = true;
   $("upWrap").classList.add("hidden"); $("upBar").style.width = "0";
@@ -675,6 +775,7 @@ $("submitReq").onclick = async () => {
   const description = $("desc").value.trim();
   if (description.length < 10) return say("reqMsg", "اكتب وصف المشكلة بشكل أوضح (10 أحرف على الأقل).", true);
   const replyType = document.querySelector('input[name="reply"]:checked').value;
+  if (PAYCFG && !receipt) return say("reqMsg", "أرفق صورة إيصال التحويل قبل الإرسال.", true);
   const user = auth.currentUser;
   const reqRef = doc(collection(db, "requests"));
   $("submitReq").disabled = true; say("reqMsg", "");
@@ -698,11 +799,17 @@ $("submitReq").onclick = async () => {
       }
       $("upText").textContent = "تم رفع المرفقات.";
     }
+    let payment = { method: "none", status: "not_required", amount: PRICES[replyType] };
+    if (PAYCFG && receipt) {
+      $("upWrap").classList.remove("hidden"); $("upText").textContent = "جاري رفع إيصال التحويل…";
+      const up = await uploadToCloudinary(receipt.blob, `siyanati/requests/${reqRef.id}`, "receipt", () => {});
+      payment = { method: "transfer", status: "pending", amount: PRICES[replyType], receiptUrl: up.secure_url, submittedAt: new Date().toISOString() };
+    }
     await setDoc(reqRef, {
       uid: user.uid, phone: profileData.phone || user.phoneNumber || "",
       customerName: profileData.name, city: profileData.city || "", car: profileData.car,
       description, replyType, price: replyType === "call" ? 45 : 25,
-      attachments, status: "new", paid: false, createdAt: serverTimestamp()
+      attachments, payment, status: "new", paid: payment.status === "not_required", createdAt: serverTimestamp()
     });
     resetRequest(); show("sent");
   } catch (e) {
@@ -714,7 +821,7 @@ $("submitReq").onclick = async () => {
 $("reqBack").onclick = () => { stopRec(); show("home"); };
 $("sentHome").onclick = renderHome;
 $("editCar").onclick = openProfile;
-$("newReq").onclick = () => { resetRequest(); show("request"); };
+$("newReq").onclick = () => { resetRequest(); show("request"); loadPayConfig(); };
 $("logout").onclick = () => { if (unwatch) { unwatch(); unwatch = null; lastSig = null; } setBadge(0); signOut(auth); };
 </script>
 </body>
