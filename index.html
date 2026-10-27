@@ -367,6 +367,7 @@ onAuthStateChanged(auth, async user => {
   try {
     const snap = await getDoc(doc(db, "users", user.uid));
     profileData = snap.exists() ? snap.data() : null;
+    if (profileData?.role === "advisor") return location.replace("advisor.html");
     profileData && profileData.car ? renderHome() : openProfile();
   } catch (e) { console.error(e); openProfile(); say("profileMsg", "تعذّر قراءة بياناتك: " + (e.code || e.message), true); }
 });

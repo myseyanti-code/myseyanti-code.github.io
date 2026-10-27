@@ -166,7 +166,7 @@ $("recheck").onclick = () => checkRole(auth.currentUser);
 
 onAuthStateChanged(auth, user => {
   $("logout").classList.toggle("hidden", !user);
-  if (!user) { $("who").textContent = ""; return show("login"); }
+  if (!user) return location.replace("index.html");
   checkRole(user);
 });
 
@@ -177,7 +177,7 @@ async function checkRole(user){
     if (!snap.exists()) { await setDoc(ref, { phone: user.phoneNumber, role: "customer", createdAt: serverTimestamp() }); snap = await getDoc(ref); }
     me = { uid: user.uid, ...snap.data() };
     $("who").textContent = me.name || user.phoneNumber;
-    if (me.role !== "advisor") { $("myUid").value = user.uid; return show("pending"); }
+    if (me.role !== "advisor") return location.replace("index.html");
     show("dash"); loadList();
   } catch (e) { console.error(e); show("pending"); $("myUid").value = user.uid; }
 }
