@@ -80,8 +80,15 @@
 <body>
 <div class="wrap">
 
+  <!-- شاشة التحميل -->
+  <section id="splash" style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+    <svg width="72" height="72" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#0B8A87"/><path d="M26 70H94V61Q94 55 88 54L81 53 71 40H47L37 53 32 54Q26 55 26 61Z" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><circle cx="43" cy="70" r="8" fill="#0B8A87" stroke="#fff" stroke-width="6"/><circle cx="77" cy="70" r="8" fill="#0B8A87" stroke="#fff" stroke-width="6"/></svg>
+    <div style="font-size:24px;font-weight:800;color:#0E2A2F">صيانتي</div>
+    <div style="font-size:14px;color:#4A6266">جاري التحميل…</div>
+  </section>
+
   <!-- شاشة الدخول -->
-  <section id="login">
+  <section id="login" class="hidden">
     <div class="hero">
       <div class="brand">
         <svg width="40" height="40" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/><path d="M26 70H94V61Q94 55 88 54L81 53 71 40H47L37 53 32 54Q26 55 26 61Z" fill="none" stroke="#0B8A87" stroke-width="6" stroke-linejoin="round"/><circle cx="43" cy="70" r="8" fill="#fff" stroke="#0B8A87" stroke-width="6"/><circle cx="77" cy="70" r="8" fill="#fff" stroke="#0B8A87" stroke-width="6"/></svg>
@@ -255,7 +262,7 @@ function uploadToCloudinary(blob, folder, publicId, onProgress){
 }
 
 const $ = id => document.getElementById(id);
-const show = id => { ["login","profile","home","request","sent"].forEach(s => $(s).classList.toggle("hidden", s !== id)); window.scrollTo(0, 0); };
+const show = id => { ["splash","login","profile","home","request","sent"].forEach(s => $(s).classList.toggle("hidden", s !== id)); window.scrollTo(0, 0); };
 const say = (el, text, err=false) => { $(el).textContent = text; $(el).classList.toggle("err", err); };
 
 // سنوات الصنع

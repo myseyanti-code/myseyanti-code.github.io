@@ -65,8 +65,11 @@
   <div class="row"><span id="who"></span><button id="logout" class="hidden">خروج</button></div>
 </header>
 
+<!-- التحميل -->
+<section id="splash" class="wrap"><div class="card narrow empty">جاري التحميل…</div></section>
+
 <!-- الدخول -->
-<section id="login" class="wrap">
+<section id="login" class="wrap hidden">
   <div class="card narrow">
     <h2>دخول المستشار</h2>
     <div id="stepPhone" class="field">
@@ -128,7 +131,7 @@ const auth = getAuth(app); auth.languageCode = "ar";
 const db = getFirestore(app);
 
 const $ = id => document.getElementById(id);
-const show = id => ["login","pending","dash"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+const show = id => ["splash","login","pending","dash"].forEach(s => $(s).classList.toggle("hidden", s !== id));
 const say = (el, t, err=false) => { $(el).textContent = t; $(el).classList.toggle("err", err); };
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const fmtDate = ts => ts ? new Date(ts.seconds * 1000).toLocaleString("ar-SA", { dateStyle: "medium", timeStyle: "short" }) : "";
