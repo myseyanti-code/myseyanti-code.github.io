@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B8A87">
+<title>صيانتي · لوحة المستشار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--teal:#0B8A87;--teal-dark:#087271;--teal-soft:#E3F2F1;--ink:#0E2A2F;--muted:#4A6266;--line:#CFE0E0;--bg:#F4F8F8;--danger:#B42318;--warn-bg:#FCEFD9;--warn:#8A4B0B}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .hidden{display:none!important}
+  header{background:var(--teal);color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 20px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  header .brand{font-size:21px;font-weight:800;display:flex;align-items:center;gap:10px}
+  header button{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:20px;min-height:40px;padding:0 14px;font:inherit;font-weight:700;cursor:pointer}
+  .wrap{max-width:1300px;margin:0 auto;padding:18px}
+  .card{background:#fff;border-radius:20px;padding:18px}
+  .narrow{max-width:440px;margin:40px auto;display:flex;flex-direction:column;gap:14px}
+  label{font-size:15px;font-weight:700}
+  .field{display:flex;flex-direction:column;gap:6px}
+  input,select,textarea{border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;color:var(--ink);background:#fff;width:100%}
+  input,select{height:48px}
+  textarea{padding:12px 14px;min-height:90px;resize:vertical;line-height:1.6}
+  input:focus,select:focus,textarea:focus{outline:3px solid var(--teal-soft);border-color:var(--teal)}
+  .btn{min-height:48px;border:none;border-radius:14px;background:var(--teal);color:#fff;font:inherit;font-size:16px;font-weight:800;padding:0 20px;cursor:pointer}
+  .btn.dark{background:var(--ink)}
+  .btn.ghost{background:#fff;color:var(--teal-dark);border:1.5px solid var(--teal)}
+  .btn:disabled{opacity:.6}
+  .msg{font-size:14px;min-height:18px}
+  .msg.err{color:var(--danger)}
+  .layout{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+  aside{flex:1 1 300px;display:flex;flex-direction:column;gap:10px}
+  main{flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tabs button{min-height:40px;padding:0 14px;border-radius:20px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+  .tabs button.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .item{background:#fff;border:1.5px solid #DCE8E8;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:right;font:inherit;color:var(--ink);width:100%}
+  .item.on{border:2px solid var(--teal);background:#F0F8F8}
+  .item b{font-size:15px;line-height:1.5}
+  .item small{font-size:13px;color:var(--muted)}
+  .tag{font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px;background:var(--teal-soft);color:var(--teal-dark);display:inline-block}
+  .tag.call{background:var(--warn-bg);color:var(--warn)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .desc{background:var(--bg);border-radius:14px;padding:14px;font-size:16px;line-height:1.7;white-space:pre-wrap}
+  .media{display:flex;flex-wrap:wrap;gap:12px}
+  .media img{width:180px;height:130px;object-fit:cover;border-radius:12px;cursor:zoom-in}
+  .media video{width:260px;max-width:100%;border-radius:12px;background:#000}
+  .media audio{width:280px;max-width:100%}
+  h2{margin:0;font-size:20px;font-weight:800}
+  h3{margin:0;font-size:17px;font-weight:800}
+  .empty{color:var(--muted);text-align:center;padding:30px 10px}
+  .answered{background:var(--teal-soft);border-radius:14px;padding:14px;line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/><path d="M26 70H94V61Q94 55 88 54L81 53 71 40H47L37 53 32 54Q26 55 26 61Z" fill="none" stroke="#0B8A87" stroke-width="6" stroke-linejoin="round"/><circle cx="43" cy="70" r="8" fill="#fff" stroke="#0B8A87" stroke-width="6"/><circle cx="77" cy="70" r="8" fill="#fff" stroke="#0B8A87" stroke-width="6"/></svg>
+    صيانتي · لوحة المستشار
+  </div>
+  <div class="row"><span id="who"></span><button id="logout" class="hidden">خروج</button></div>
+</header>
+
+<!-- الدخول -->
+<section id="login" class="wrap">
+  <div class="card narrow">
+    <h2>دخول المستشار</h2>
+    <div id="stepPhone" class="field">
+      <label for="phone">رقم الجوال</label>
+      <div class="row" style="direction:ltr;flex-wrap:nowrap"><span class="tag" style="padding:14px">+966</span><input id="phone" type="tel" inputmode="numeric" placeholder="5XXXXXXXX"></div>
+      <button id="sendBtn" class="btn">أرسل رمز التحقق</button>
+    </div>
+    <div id="stepCode" class="field hidden">
+      <label for="code">رمز التحقق</label>
+      <input id="code" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" style="direction:ltr;text-align:center;letter-spacing:8px">
+      <button id="verifyBtn" class="btn">دخول</button>
+    </div>
+    <div id="loginMsg" class="msg" role="status"></div>
+  </div>
+</section>
+
+<!-- بانتظار التفعيل -->
+<section id="pending" class="wrap hidden">
+  <div class="card narrow">
+    <h2>حسابك بانتظار التفعيل</h2>
+    <p style="margin:0;line-height:1.8;color:var(--muted)">هذا الحساب غير مفعّل كمستشار. يفعّله مدير النظام بتغيير الصلاحية إلى <b>advisor</b> في قاعدة البيانات.</p>
+    <div class="field"><label>رقم الحساب (UID)</label><input id="myUid" readonly style="direction:ltr"></div>
+    <button id="recheck" class="btn ghost">تحقق مرة ثانية</button>
+  </div>
+</section>
+
+<!-- اللوحة -->
+<section id="dash" class="wrap hidden">
+  <div class="layout">
+    <aside>
+      <div class="tabs" role="tablist">
+        <button data-st="new" class="on">جديدة</button>
+        <button data-st="accepted">قيد المتابعة</button>
+        <button data-st="answered">تم الرد</button>
+      </div>
+      <button id="refresh" class="btn ghost" style="min-height:40px">تحديث القائمة</button>
+      <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </aside>
+    <main id="detail"><div class="card empty">اختر طلبًا من القائمة لعرض تفاصيله.</div></main>
+  </div>
+</section>
+
+<div id="recaptcha"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCFGwmvvvG2skW-c9KdwPWchcD-x-ahOfM",
+  authDomain: "siyanati-a2d39.firebaseapp.com",
+  projectId: "siyanati-a2d39",
+  storageBucket: "siyanati-a2d39.firebasestorage.app",
+  messagingSenderId: "671981506093",
+  appId: "1:671981506093:web:18f5082b7545681ff832a4"
+});
+const auth = getAuth(app); auth.languageCode = "ar";
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+const show = id => ["login","pending","dash"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+const say = (el, t, err=false) => { $(el).textContent = t; $(el).classList.toggle("err", err); };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const fmtDate = ts => ts ? new Date(ts.seconds * 1000).toLocaleString("ar-SA", { dateStyle: "medium", timeStyle: "short" }) : "";
+
+// ===== الدخول =====
+let verifier, confirmation, me = null, current = null, tab = "new";
+function normalizePhone(v){ let d = v.replace(/\D/g,""); if (d.startsWith("966")) d = d.slice(3); if (d.startsWith("0")) d = d.slice(1); return /^5\d{8}$/.test(d) ? "+966" + d : null; }
+
+$("sendBtn").onclick = async () => {
+  const phone = normalizePhone($("phone").value);
+  if (!phone) return say("loginMsg", "اكتب رقم جوال سعودي صحيح.", true);
+  $("sendBtn").disabled = true; say("loginMsg", "جاري الإرسال…");
+  try {
+    if (!verifier) verifier = new RecaptchaVerifier(auth, "recaptcha", { size: "invisible" });
+    confirmation = await signInWithPhoneNumber(auth, phone, verifier);
+    $("stepPhone").classList.add("hidden"); $("stepCode").classList.remove("hidden"); say("loginMsg", "");
+  } catch (e) { say("loginMsg", "تعذّر الإرسال: " + (e.code || e.message), true); if (verifier) { verifier.clear(); verifier = null; } }
+  finally { $("sendBtn").disabled = false; }
+};
+$("verifyBtn").onclick = async () => {
+  try { await confirmation.confirm($("code").value.trim()); } catch { say("loginMsg", "الرمز غير صحيح.", true); }
+};
+$("logout").onclick = () => signOut(auth);
+$("recheck").onclick = () => checkRole(auth.currentUser);
+
+onAuthStateChanged(auth, user => {
+  $("logout").classList.toggle("hidden", !user);
+  if (!user) { $("who").textContent = ""; return show("login"); }
+  checkRole(user);
+});
+
+async function checkRole(user){
+  try {
+    const ref = doc(db, "users", user.uid);
+    let snap = await getDoc(ref);
+    if (!snap.exists()) { await setDoc(ref, { phone: user.phoneNumber, role: "customer", createdAt: serverTimestamp() }); snap = await getDoc(ref); }
+    me = { uid: user.uid, ...snap.data() };
+    $("who").textContent = me.name || user.phoneNumber;
+    if (me.role !== "advisor") { $("myUid").value = user.uid; return show("pending"); }
+    show("dash"); loadList();
+  } catch (e) { console.error(e); show("pending"); $("myUid").value = user.uid; }
+}
+
+// ===== القائمة =====
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+  tab = b.dataset.st; loadList();
+});
+$("refresh").onclick = () => loadList();
+
+async function loadList(){
+  const box = $("list"); box.innerHTML = '<div class="empty">جاري التحميل…</div>';
+  try {
+    const snap = await getDocs(query(collection(db, "requests"), where("status", "==", tab)));
+    let list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (tab === "accepted") list = list.filter(r => r.advisorUid === me.uid);
+    list.sort((a, b) => (tab === "new" ? 1 : -1) * ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)));
+    if (!list.length) { box.innerHTML = '<div class="empty">لا توجد طلبات هنا.</div>'; return; }
+    box.innerHTML = "";
+    for (const r of list) {
+      const el = document.createElement("button"); el.className = "item" + (current?.id === r.id ? " on" : "");
+      el.innerHTML = `<b>${esc(r.description.length > 60 ? r.description.slice(0, 60) + "…" : r.description)}</b>
+        <small>${esc(r.customerName)} · ${esc(r.car?.make)} ${esc(r.car?.model)} ${esc(r.car?.year)}</small>
+        <div class="row"><span class="tag ${r.replyType === "call" ? "call" : ""}">${r.replyType === "call" ? "مكالمة صوتية" : "محادثة كتابية"}</span>
+        <small>${(r.attachments || []).length} مرفقات · ${fmtDate(r.createdAt)}</small></div>`;
+      el.onclick = () => { current = r; renderDetail(); loadList(); };
+      box.appendChild(el);
+    }
+  } catch (e) { console.error(e); box.innerHTML = `<div class="empty">تعذّر التحميل: ${esc(e.code || e.message)}</div>`; }
+}
+
+// ===== التفاصيل =====
+function mediaHTML(atts){
+  return (atts || []).map(a => {
+    if (a.kind === "image") return `<a href="${esc(a.url)}" target="_blank" rel="noopener"><img src="${esc(a.url)}" alt="صورة من العميل"></a>`;
+    if (a.kind === "video") return `<video src="${esc(a.url)}" controls playsinline preload="metadata"></video>`;
+    if (a.kind === "audio") return `<div><small>تسجيل صوتي ${esc(a.duration || "")}</small><br><audio src="${esc(a.url)}" controls preload="metadata"></audio></div>`;
+    return "";
+  }).join("") || '<small style="color:var(--muted)">لا توجد مرفقات.</small>';
+}
+
+function renderDetail(){
+  const r = current, d = $("detail");
+  const car = r.car || {};
+  const head = `
+  <section class="card" style="display:flex;flex-direction:column;gap:12px">
+    <div class="row" style="justify-content:space-between">
+      <div><h2>${esc(r.customerName)}</h2>
+        <small style="color:var(--muted)">${esc(car.make)} ${esc(car.model)} · ${esc(car.year)}${car.vin ? " · الهيكل " + esc(car.vin) : ""} · ${esc(r.city)}</small></div>
+      <div class="row">
+        <a class="btn ghost" style="display:flex;align-items:center;text-decoration:none" href="tel:${esc(r.phone)}">اتصال ${esc(r.phone)}</a>
+        ${r.status === "new" ? '<button id="accept" class="btn dark">قبول الطلب</button>' : ""}
+      </div>
+    </div>
+    <div class="row"><span class="tag ${r.replyType === "call" ? "call" : ""}">${r.replyType === "call" ? "طلب مكالمة صوتية" : "طلب محادثة كتابية"}</span><small>${fmtDate(r.createdAt)}</small></div>
+    <div class="desc">${esc(r.description)}</div>
+    <h3>المرفقات</h3>
+    <div class="media">${mediaHTML(r.attachments)}</div>
+  </section>`;
+
+  if (r.status === "answered") {
+    const a = r.answer || {};
+    d.innerHTML = head + `<section class="card"><h3>ردّك المرسل</h3><div class="answered">
+      <b>التشخيص:</b> ${esc(a.diagnosis)}<br><b>الحل:</b> ${esc(a.solution)}<br>
+      <b>التكلفة التقريبية:</b> ${esc(a.costFrom)} – ${esc(a.costTo)} ر.س<br><b>الأهمية:</b> ${esc(a.urgency)}<br>
+      <b>المركز:</b> ${esc(a.centerName)} ${a.centerMap ? `<a href="${esc(a.centerMap)}" target="_blank" rel="noopener">الموقع</a>` : ""}</div></section>`;
+    return;
+  }
+
+  d.innerHTML = head + `
+  <section class="card" style="display:flex;flex-direction:column;gap:12px">
+    <h3>التشخيص والرد</h3>
+    ${r.status === "new" ? '<small style="color:var(--muted)">اقبل الطلب أولًا عشان ينتقل لقائمتك ولا يأخذه مستشار ثاني.</small>' : ""}
+    <div class="field"><label for="diag">التشخيص المبدئي</label><input id="diag" placeholder="مثال: تآكل فحمات الفرامل الأمامية"></div>
+    <div class="field"><label for="sol">الحل المقترح</label><textarea id="sol" placeholder="اشرح للعميل المطلوب بلغة بسيطة…"></textarea></div>
+    <div class="grid">
+      <div class="field"><label for="cf">التكلفة من (ر.س)</label><input id="cf" type="number" inputmode="numeric" min="0"></div>
+      <div class="field"><label for="ct">إلى (ر.س)</label><input id="ct" type="number" inputmode="numeric" min="0"></div>
+      <div class="field"><label for="urg">درجة الأهمية</label><select id="urg">
+        <option>عاجل — لا تستخدم السيارة قبل الإصلاح</option><option>خلال أيام</option><option>غير عاجل</option></select></div>
+    </div>
+    <div class="grid">
+      <div class="field"><label for="cn">المركز المُرشَّح</label><input id="cn" placeholder="اسم المركز والحي"></div>
+      <div class="field"><label for="cm">رابط الموقع على الخريطة</label><input id="cm" type="url" placeholder="https://maps.app.goo.gl/…" style="direction:ltr"></div>
+    </div>
+    <div class="row" style="justify-content:flex-end"><button id="sendAns" class="btn" ${r.status === "new" ? "disabled" : ""}>إرسال التشخيص للعميل</button></div>
+    <div id="ansMsg" class="msg" role="status"></div>
+  </section>`;
+
+  if ($("accept")) $("accept").onclick = async () => {
+    $("accept").disabled = true;
+    try {
+      // تأكد أن الطلب ما زال جديدًا
+      const fresh = await getDoc(doc(db, "requests", r.id));
+      if (fresh.data().status !== "new") { alert("هذا الطلب أخذه مستشار آخر."); current = null; $("detail").innerHTML = '<div class="card empty">اختر طلبًا.</div>'; return loadList(); }
+      await updateDoc(doc(db, "requests", r.id), { status: "accepted", advisorUid: me.uid, advisorName: me.name || "", acceptedAt: serverTimestamp() });
+      current = { ...r, status: "accepted", advisorUid: me.uid }; renderDetail(); loadList();
+    } catch (e) { alert("تعذّر القبول: " + (e.code || e.message)); $("accept").disabled = false; }
+  };
+
+  $("sendAns").onclick = async () => {
+    const ans = { diagnosis: $("diag").value.trim(), solution: $("sol").value.trim(),
+      costFrom: Number($("cf").value) || 0, costTo: Number($("ct").value) || 0, urgency: $("urg").value,
+      centerName: $("cn").value.trim(), centerMap: $("cm").value.trim() };
+    if (!ans.diagnosis || !ans.solution) return say("ansMsg", "اكتب التشخيص والحل المقترح.", true);
+    if (ans.costTo && ans.costTo < ans.costFrom) return say("ansMsg", "التكلفة «إلى» أقل من «من».", true);
+    $("sendAns").disabled = true; say("ansMsg", "جاري الإرسال…");
+    try {
+      await updateDoc(doc(db, "requests", r.id), { status: "answered", answer: ans, answeredAt: serverTimestamp(), advisorUid: me.uid, advisorName: me.name || "" });
+      current = { ...r, status: "answered", answer: ans }; renderDetail(); loadList();
+    } catch (e) { say("ansMsg", "تعذّر الإرسال: " + (e.code || e.message), true); $("sendAns").disabled = false; }
+  };
+}
+</script>
+</body>
+</html>
