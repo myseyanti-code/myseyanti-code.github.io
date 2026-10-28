@@ -111,6 +111,7 @@
         <button data-st="answered">تم الرد</button>
         <button data-st="centers">المراكز</button>
         <button data-st="settings">إعدادات الدفع</button>
+        <button data-st="users" class="hidden">المستخدمون</button>
       </div>
       <button id="refresh" class="btn ghost" style="min-height:40px">تحديث القائمة</button>
       <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -189,7 +190,8 @@ async function checkRole(user){
     if (!snap.exists()) { await setDoc(ref, { phone: user.phoneNumber || null, email: user.email || null, role: "customer", createdAt: serverTimestamp() }); snap = await getDoc(ref); }
     me = { uid: user.uid, ...snap.data() };
     $("who").textContent = me.name || user.displayName || (user.phoneNumber ? ltr(fmtPhone(user.phoneNumber)) : (user.email || ""));
-    if (me.role !== "advisor") return location.replace("index.html");
+    if (!["advisor", "admin"].includes(me.role)) return location.replace("index.html");
+    document.querySelector('.tabs button[data-st="users"]').classList.toggle("hidden", me.role !== "admin");
     show("dash"); loadList(); startWatch();
     $("notifBtn").classList.toggle("hidden", !(canNotify() && Notification.permission === "default"));
   } catch (e) { console.error(e); show("pending"); $("myUid").value = user.uid; }
@@ -261,6 +263,7 @@ $("refresh").onclick = () => loadList();
 
 async function loadList(){
   if (tab === "centers") return loadCenters();
+  if (tab === "users") return loadUsers();
   if (tab === "settings") { $("list").innerHTML = '<div class="empty">بيانات الحسابات اللي يحوّل لها العملاء.</div>'; return renderPaySettings(); }
   const box = $("list"); box.innerHTML = '<div class="empty">جاري التحميل…</div>';
   try {
@@ -465,6 +468,67 @@ async function renderPaySettings(){
     catch (e) { say("p_msg", "تعذّر الحفظ: " + (e.code || e.message), true); }
     finally { $("p_save").disabled = false; }
   };
+}
+
+// ===== إدارة المستخدمين (للمدير فقط) =====
+const ROLE_LABEL = { customer: "عميل", advisor: "مستشار", admin: "مدير" };
+let USERS = [];
+async function loadUsers(){
+  const box = $("list"); box.innerHTML = '<div class="empty">جاري التحميل…</div>';
+  try {
+    const snap = await getDocs(collection(db, "users"));
+    USERS = snap.docs.map(d => ({ uid: d.id, ...d.data() }))
+      .sort((a, b) => (["admin","advisor","customer"].indexOf(a.role) - ["admin","advisor","customer"].indexOf(b.role)) || (a.name || "").localeCompare(b.name || "", "ar"));
+    box.innerHTML = `<input id="uSearch" type="search" placeholder="ابحث بالاسم أو الجوال أو البريد" aria-label="بحث">
+      <small style="color:var(--muted)">${USERS.length} مستخدم · ${USERS.filter(u => u.role === "advisor").length} مستشار</small>
+      <div id="uList" style="display:flex;flex-direction:column;gap:10px"></div>`;
+    const draw = () => {
+      const q = $("uSearch").value.trim().toLowerCase().replace(/^0/, "");
+      const list = USERS.filter(u => !q || [u.name, u.phone, u.email].some(v => String(v || "").toLowerCase().includes(q)));
+      $("uList").innerHTML = "";
+      for (const u of list) {
+        const el = document.createElement("button"); el.className = "item" + (current?.uid === u.uid ? " on" : "");
+        el.innerHTML = `<b>${esc(u.name || "بدون اسم")}</b>
+          <small><bdi dir="ltr">${esc(u.phone ? fmtPhone(u.phone) : (u.email || ""))}</bdi>${u.city ? " · " + esc(u.city) : ""}</small>
+          <div class="row"><span class="tag ${u.role === "customer" ? "" : "call"}">${ROLE_LABEL[u.role] || esc(u.role)}</span></div>`;
+        el.onclick = () => renderUser(u);
+        $("uList").appendChild(el);
+      }
+      if (!list.length) $("uList").innerHTML = '<div class="empty">ما فيه نتائج.</div>';
+    };
+    $("uSearch").oninput = draw; draw();
+  } catch (e) { console.error(e); box.innerHTML = `<div class="empty">تعذّر التحميل: ${esc(e.code || e.message)}</div>`; }
+}
+
+function renderUser(u){
+  const self = u.uid === me.uid;
+  $("detail").innerHTML = `
+  <section class="card" style="display:flex;flex-direction:column;gap:12px">
+    <h2>${esc(u.name || "بدون اسم")}</h2>
+    <div class="answered">
+      <b>الجوال:</b> <bdi dir="ltr">${esc(u.phone ? fmtPhone(u.phone) : "—")}</bdi><br>
+      <b>البريد:</b> ${esc(u.email || "—")}<br>
+      <b>المدينة:</b> ${esc(u.city || "—")}<br>
+      ${u.car ? `<b>السيارة:</b> ${esc(u.car.make)} ${esc(u.car.model)} ${esc(u.car.year)}<br>` : ""}
+      <b>الصلاحية الحالية:</b> ${ROLE_LABEL[u.role] || esc(u.role)}
+    </div>
+    ${self ? '<small style="color:var(--muted)">هذا حسابك، وما تقدر تغيّر صلاحيته من هنا.</small>'
+      : u.role === "admin" ? '<small style="color:var(--muted)">صلاحية المدير تتغيّر من Firestore فقط.</small>'
+      : `<div class="row">
+          ${u.role === "customer" ? '<button id="uPromote" class="btn">ترقية إلى مستشار</button>' : '<button id="uDemote" class="btn ghost" style="color:var(--danger);border-color:var(--danger)">إلغاء صلاحية المستشار</button>'}
+        </div>`}
+    <div id="uMsg" class="msg" role="status"></div>
+  </section>`;
+  const setRole = async role => {
+    const label = role === "advisor" ? "ترقية هذا المستخدم إلى مستشار؟ بيقدر يشوف كل الطلبات وبيانات العملاء." : "إلغاء صلاحية المستشار لهذا المستخدم؟";
+    if (!confirm(label)) return;
+    try {
+      await updateDoc(doc(db, "users", u.uid), { role });
+      u.role = role; say("uMsg", "تم التحديث ✓"); loadUsers(); renderUser(u);
+    } catch (e) { say("uMsg", "تعذّر التحديث: " + (e.code || e.message), true); }
+  };
+  if ($("uPromote")) $("uPromote").onclick = () => setRole("advisor");
+  if ($("uDemote")) $("uDemote").onclick = () => setRole("customer");
 }
 
 // ===== مراكز الصيانة =====

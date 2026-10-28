@@ -132,6 +132,7 @@
         الدخول بحساب Google
       </button>
       <div id="loginMsg" class="msg" role="status"></div>
+      <p class="note" style="line-height:1.8">بالمتابعة، أنت توافق على <a href="privacy.html#terms" style="color:var(--teal-dark);font-weight:700">شروط الاستخدام</a> و<a href="privacy.html#privacy" style="color:var(--teal-dark);font-weight:700">سياسة الخصوصية</a>.</p>
     </div>
   </section>
 
@@ -183,6 +184,7 @@
       <h2>استشاراتي</h2>
       <div id="myReqs" style="display:flex;flex-direction:column;gap:10px"><div class="note">ما عندك استشارات للحين.</div></div>
       <button id="logout" class="btn ghost">تسجيل الخروج</button>
+      <a href="privacy.html" class="note" style="display:block;color:var(--muted)">سياسة الخصوصية وشروط الاستخدام</a>
     </div>
   </section>
 
@@ -418,7 +420,7 @@ onAuthStateChanged(auth, async user => {
   try {
     const snap = await getDoc(doc(db, "users", user.uid));
     profileData = snap.exists() ? snap.data() : null;
-    if (profileData?.role === "advisor") return location.replace("advisor.html");
+    if (["advisor", "admin"].includes(profileData?.role)) return location.replace("advisor.html");
     profileData && profileData.car && (profileData.phone || user.phoneNumber) ? renderHome() : openProfile();
   } catch (e) { console.error(e); openProfile(); say("profileMsg", "تعذّر قراءة بياناتك: " + (e.code || e.message), true); }
 });
