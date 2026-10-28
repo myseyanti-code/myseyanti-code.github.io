@@ -309,6 +309,7 @@ function renderDetail(){
       <div class="row">
         <a class="btn ghost" style="display:flex;align-items:center;text-decoration:none" href="tel:${esc(r.phone)}">اتصال&nbsp;<bdi dir="ltr">${esc(fmtPhone(r.phone))}</bdi></a>
         ${r.status === "new" ? '<button id="accept" class="btn dark">قبول الطلب</button>' : ""}
+        ${r.status !== "answered" ? '<button id="delAny" class="btn ghost" style="color:var(--danger);border-color:var(--danger)">حذف</button>' : ""}
       </div>
     </div>
     <div class="row"><span class="tag ${r.replyType === "call" ? "call" : ""}">${r.replyType === "call" ? "طلب مكالمة صوتية" : "طلب محادثة كتابية"}</span><small>${fmtDate(r.createdAt)}</small></div>
@@ -361,6 +362,11 @@ function renderDetail(){
     <div id="ansMsg" class="msg" role="status"></div>
   </section>`;
 
+  if ($("delAny")) $("delAny").onclick = async () => {
+    if (!confirm("حذف هذا الطلب نهائيًا؟ (مناسب للطلبات التجريبية أو المكررة)")) return;
+    try { await deleteDoc(doc(db, "requests", r.id)); current = null; $("detail").innerHTML = '<div class="card empty">تم حذف الطلب.</div>'; loadList(); }
+    catch (e) { alert("تعذّر الحذف: " + (e.code || e.message)); }
+  };
   if ($("accept")) $("accept").onclick = async () => {
     $("accept").disabled = true;
     try {
