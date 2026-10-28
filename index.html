@@ -142,13 +142,13 @@
     <div class="body">
       <div class="field"><label for="name">الاسم</label><input id="name" type="text" autocomplete="name"></div>
       <div class="field">
-        <label for="make">نوع السيارة</label>
-        <select id="make"><option value="">اختر نوع السيارة</option></select>
-        <input id="makeOther" type="text" class="hidden" placeholder="اكتب نوع السيارة">
+        <label for="make">الشركة المصنّعة</label>
+        <select id="make"><option value="">اختر الشركة (تويوتا، هيونداي…)</option></select>
+        <input id="makeOther" type="text" class="hidden" placeholder="اكتب اسم الشركة المصنّعة">
       </div>
       <div class="row">
-        <div class="field"><label for="model">الموديل</label><input id="model" type="text" list="models" placeholder="اختر أو اكتب"><datalist id="models"></datalist></div>
-        <div class="field"><label for="year">سنة الصنع</label><select id="year"><option value="">اختر السنة</option></select></div>
+        <div class="field"><label for="model">النوع</label><input id="model" type="text" list="models" placeholder="مثال: لاند كروزر"><datalist id="models"></datalist></div>
+        <div class="field"><label for="year">الموديل (سنة الصنع)</label><select id="year"><option value="">اختر الموديل</option></select></div>
       </div>
       <div class="field">
         <label for="vin">رقم الهيكل (VIN)</label>
@@ -451,7 +451,7 @@ $("saveBtn").onclick = async () => {
     name: $("name").value.trim(), city: $("city").value.trim(),
     car: { make, model: $("model").value.trim(), year: Number($("year").value), vin }
   };
-  if (!data.name || !make || !data.car.model || !data.car.year) return say("profileMsg", "عبّئ الاسم ونوع السيارة والموديل وسنة الصنع.", true);
+  if (!data.name || !make || !data.car.model || !data.car.year) return say("profileMsg", "عبّئ الاسم والشركة المصنّعة والنوع والموديل.", true);
   const contact = auth.currentUser.phoneNumber || normalizePhone($("contactPhone").value);
   if (!contact) return say("profileMsg", "اكتب رقم جوال سعودي صحيح للتواصل (يبدأ بـ 5).", true);
   data.phone = contact;
@@ -459,7 +459,11 @@ $("saveBtn").onclick = async () => {
   $("saveBtn").disabled = true; say("profileMsg", "جاري الحفظ…");
   try {
     const user = auth.currentUser;
-    await setDoc(doc(db, "users", user.uid), { ...data, email: user.email || null, role: profileData?.role || "customer", updatedAt: serverTimestamp() }, { merge: true });
+    const ref = doc(db, "users", user.uid);
+    const existing = await getDoc(ref);
+    if (existing.exists()) await updateDoc(ref, { ...data, email: user.email || null, updatedAt: serverTimestamp() });
+    else await setDoc(ref, { ...data, email: user.email || null, role: "customer", createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    profileData = { ...(existing.exists() ? existing.data() : { role: "customer" }), ...profileData };
     profileData = { ...profileData, ...data };
     say("profileMsg", ""); renderHome();
   } catch (e) { say("profileMsg", "تعذّر الحفظ: " + (e.code || e.message), true); }
@@ -469,7 +473,7 @@ $("saveBtn").onclick = async () => {
 function renderHome(){
   $("hello").textContent = "أهلًا " + (profileData.name || "");
   $("carName").textContent = profileData.car.make + " " + profileData.car.model;
-  $("carYear").textContent = "سنة الصنع " + profileData.car.year + (profileData.car.vin ? " · الهيكل …" + profileData.car.vin.slice(-6) : "");
+  $("carYear").textContent = "موديل " + profileData.car.year + (profileData.car.vin ? " · الهيكل …" + profileData.car.vin.slice(-6) : "");
   show("home");
   loadMyRequests();
   startWatch();
