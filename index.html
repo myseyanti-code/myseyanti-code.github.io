@@ -90,6 +90,23 @@
   .acct{background:var(--bg);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px}
   .acct .val{display:flex;align-items:center;justify-content:space-between;gap:8px;direction:ltr;font-weight:800;font-size:15px;word-break:break-all}
   .acct button{border:none;background:var(--teal-soft);color:var(--teal-dark);border-radius:10px;font:inherit;font-weight:700;font-size:13px;min-height:36px;padding:0 10px;cursor:pointer;flex:none}
+  .svc{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:20px;padding:6px 12px;font-size:14px;font-weight:700;cursor:pointer;background:#fff;min-height:40px}
+  .svc:has(input:checked){border-color:var(--teal);background:var(--teal-soft);color:var(--teal-dark)}
+  .svc input{width:16px;height:16px;accent-color:var(--teal);margin:0}
+  .inv{background:#fff;border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+  .inv img{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:none}
+  .rp{background:#fff;border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px}
+  .rp h3{margin:0;font-size:17px;font-weight:800;color:var(--teal-dark)}
+  .rp table{width:100%;border-collapse:collapse;font-size:14px}
+  .rp th,.rp td{text-align:right;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  .rp th{color:var(--muted);font-weight:700}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .kpi{background:var(--bg);border-radius:14px;padding:12px;text-align:center}
+  .kpi b{display:block;font-size:22px;color:var(--teal-dark)}
+  .kpi small{color:var(--muted);font-size:13px}
+  .due{display:inline-block;font-size:12px;font-weight:800;border-radius:10px;padding:3px 10px}
+  .due.ok{background:var(--teal-soft);color:var(--teal-dark)} .due.soon{background:#FCEFD9;color:#8A4B0B} .due.late{background:#FDECEC;color:var(--danger)}
+  @media print{ .noprint{display:none!important} body{background:#fff} .rp{break-inside:avoid;border:1px solid #ddd} .wrap{max-width:none} }
   .paystate{font-size:13px;font-weight:700;border-radius:10px;padding:6px 10px;align-self:flex-start}
   .steps i{font-style:normal;width:32px;height:32px;border-radius:16px;background:var(--teal-soft);color:var(--teal);font-weight:800;display:flex;align-items:center;justify-content:center}
 </style>
@@ -177,6 +194,10 @@
         <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6M9 10h6"/></svg></span>
         <span><b>اطلب استشارتك الآن</b><small>اشرح المشكلة ومستشارنا يرد عليك</small></span>
       </button>
+      <button id="openMaint" class="cta" style="background:#fff;color:var(--ink);border:1.5px solid var(--line)">
+        <span class="ic" style="background:var(--teal-soft)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0B8A87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l1 2h3v16H5V5h3z"/><path d="M9 11h6M9 15h4"/></svg></span>
+        <span><b>سجل الصيانة وتقرير الحالة</b><small style="color:var(--muted)">احفظ فواتيرك واعرف قيمة سيارتك للبيع</small></span>
+      </button>
       <div id="homeMsg" class="msg" role="status"></div>
       <h2>كيف تعمل الخدمة؟</h2>
       <div class="steps"><div><i>١</i>وصف المشكلة</div><div><i>٢</i>استشارة المستشار</div><div><i>٣</i>التوجه لمركز موثوق</div></div>
@@ -186,6 +207,65 @@
       <button id="logout" class="btn ghost">تسجيل الخروج</button>
       <a href="privacy.html" class="note" style="display:block;color:var(--muted)">سياسة الخصوصية وشروط الاستخدام</a>
     </div>
+  </section>
+
+  <!-- سجل الصيانة -->
+  <section id="maint" class="hidden">
+    <div class="topbar">
+      <button id="maintBack" class="iconbtn" aria-label="رجوع"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0E2A2F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+      <h1>سجل صيانة سيارتي</h1>
+    </div>
+    <div class="body" style="padding-top:8px">
+      <div class="paycard">
+        <b id="mCarName" style="font-size:17px"></b>
+        <div class="row">
+          <div class="field"><label for="mPrice">سعر الشراء جديدة (ر.س)</label><input id="mPrice" type="number" inputmode="numeric" min="0" placeholder="مثال: 180000"></div>
+          <div class="field"><label for="mOdo">الممشى الحالي (كم)</label><input id="mOdo" type="number" inputmode="numeric" min="0" placeholder="مثال: 85000"></div>
+        </div>
+        <button id="mSaveCar" class="btn ghost" type="button" style="height:46px;font-size:16px">حفظ بيانات السيارة</button>
+        <div id="mCarMsg" class="msg" role="status"></div>
+      </div>
+
+      <h2>إضافة فاتورة صيانة</h2>
+      <div class="paycard">
+        <div class="row">
+          <div class="field"><label for="iDate">التاريخ</label><input id="iDate" type="date"></div>
+          <div class="field"><label for="iKm">الممشى وقتها (كم)</label><input id="iKm" type="number" inputmode="numeric" min="0"></div>
+        </div>
+        <div class="field"><label for="iCenter">مركز الصيانة</label><input id="iCenter" type="text" placeholder="اسم المركز"></div>
+        <fieldset style="border:none;margin:0;padding:0"><legend style="font-size:16px;font-weight:700;padding:0;margin-bottom:8px">نوع الخدمة</legend>
+          <div id="iServices" class="chips"></div>
+        </fieldset>
+        <div class="row">
+          <div class="field"><label for="iCost">المبلغ (ر.س)</label><input id="iCost" type="number" inputmode="numeric" min="0"></div>
+          <div class="field"><label for="iNotes">ملاحظات</label><input id="iNotes" type="text" placeholder="اختياري"></div>
+        </div>
+        <button id="iAddImg" type="button" class="btn ghost" style="border:1.5px dashed var(--teal);height:50px">📎 صورة الفاتورة</button>
+        <input id="iImgIn" type="file" accept="image/*" class="hidden">
+        <div id="iImgChip"></div>
+        <button id="iSave" class="btn" type="button">حفظ الفاتورة</button>
+        <div id="iMsg" class="msg" role="status"></div>
+      </div>
+
+      <h2 id="iCount">الفواتير</h2>
+      <div id="iList" style="display:flex;flex-direction:column;gap:10px"></div>
+
+      <h2>تقرير حالة السيارة</h2>
+      <div class="paycard" id="repCard">
+        <div class="note" style="text-align:right;line-height:1.8">تقرير شامل: سجل الصيانة، ودرجة الالتزام بالصيانة الدورية، والصيانة المستحقة، وتقدير لقيمة السيارة في السوق. تقدر تحفظه PDF وترسله للمشتري.</div>
+        <div id="repState"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- عرض التقرير -->
+  <section id="report" class="hidden">
+    <div class="topbar noprint">
+      <button id="repBack" class="iconbtn" aria-label="رجوع"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0E2A2F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+      <h1 style="flex:1">تقرير حالة السيارة</h1>
+      <button id="repPrint" class="btn" type="button" style="width:auto;height:44px;font-size:15px;padding:0 16px">حفظ PDF / طباعة</button>
+    </div>
+    <div id="reportBody" class="body" style="padding-top:8px"></div>
   </section>
 
   <!-- إرسال الطلب -->
@@ -257,7 +337,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, serverTimestamp, collection, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 // تخزين المرفقات على Cloudinary (مؤقتًا بدل Firebase Storage)
 const CLOUD_NAME = "p0nihtda";
 const UPLOAD_PRESET = "siyanati_unsigned";
@@ -298,7 +378,7 @@ function uploadToCloudinary(blob, folder, publicId, onProgress){
 }
 
 const $ = id => document.getElementById(id);
-const show = id => { ["splash","login","profile","home","request","sent"].forEach(s => $(s).classList.toggle("hidden", s !== id)); window.scrollTo(0, 0); };
+const show = id => { ["splash","login","profile","home","request","sent","maint","report"].forEach(s => $(s).classList.toggle("hidden", s !== id)); window.scrollTo(0, 0); };
 const say = (el, text, err=false) => { $(el).textContent = text; $(el).classList.toggle("err", err); };
 
 // سنوات الصنع
@@ -833,6 +913,272 @@ $("submitReq").onclick = async () => {
 
 $("reqBack").onclick = () => { stopRec(); show("home"); };
 $("sentHome").onclick = renderHome;
+// ===== سجل الصيانة وتقرير الحالة =====
+const SERVICES = ["تغيير زيت", "فلاتر", "فرامل", "إطارات", "بطارية", "تكييف", "فحص دوري", "كهرباء", "ميكانيكا", "سمكرة ودهان", "أخرى"];
+const escH = t => String(t ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nf = n => Number(n || 0).toLocaleString("en-US");
+let INVOICES = [], invImg = null, REPORTS = [], repReceipt = null, REPCFG = null;
+
+$("iServices").innerHTML = SERVICES.map(x => `<label class="svc"><input type="checkbox" value="${x}">${x}</label>`).join("");
+$("openMaint").onclick = openMaint;
+$("maintBack").onclick = renderHome;
+$("repBack").onclick = openMaint;
+$("repPrint").onclick = () => window.print();
+
+async function openMaint(){
+  show("maint");
+  const c = profileData.car || {};
+  $("mCarName").textContent = `${c.make || ""} ${c.model || ""} · موديل ${c.year || ""}`;
+  $("mPrice").value = c.purchasePrice || ""; $("mOdo").value = c.odometer || "";
+  $("iDate").value = new Date().toISOString().slice(0, 10);
+  loadInvoices(); loadReports();
+}
+
+$("mSaveCar").onclick = async () => {
+  const car = { ...profileData.car, purchasePrice: Number($("mPrice").value) || 0, odometer: Number($("mOdo").value) || 0 };
+  $("mSaveCar").disabled = true;
+  try { await updateDoc(doc(db, "users", auth.currentUser.uid), { car }); profileData.car = car; say("mCarMsg", "تم الحفظ ✓"); }
+  catch (e) { say("mCarMsg", "تعذّر الحفظ: " + (e.code || e.message), true); }
+  finally { $("mSaveCar").disabled = false; }
+};
+
+$("iAddImg").onclick = () => $("iImgIn").click();
+$("iImgIn").onchange = e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  if (f.size > 10 * 1048576) return say("iMsg", "الصورة أكبر من 10 ميجا.", true);
+  if (invImg) URL.revokeObjectURL(invImg.url);
+  invImg = { blob: f, url: URL.createObjectURL(f) };
+  $("iImgChip").innerHTML = `<div class="chip"><img src="${invImg.url}" alt=""><span>صورة الفاتورة</span></div>`;
+};
+
+$("iSave").onclick = async () => {
+  const services = [...$("iServices").querySelectorAll("input:checked")].map(x => x.value);
+  const inv = { date: $("iDate").value, km: Number($("iKm").value) || 0, center: $("iCenter").value.trim(),
+    services, cost: Number($("iCost").value) || 0, notes: $("iNotes").value.trim().slice(0, 300) };
+  if (!inv.date) return say("iMsg", "اختر تاريخ الفاتورة.", true);
+  if (!services.length) return say("iMsg", "اختر نوع خدمة واحد على الأقل.", true);
+  if (!inv.km) return say("iMsg", "اكتب الممشى وقت الصيانة.", true);
+  if (!invImg) return say("iMsg", "أرفق صورة الفاتورة.", true);
+  $("iSave").disabled = true; say("iMsg", "جاري رفع الفاتورة…");
+  try {
+    const uid = auth.currentUser.uid;
+    const up = await uploadToCloudinary(invImg.blob, `siyanati/invoices/${uid}`, "inv-" + Date.now(), () => {});
+    await addDoc(collection(db, "users", uid, "invoices"), { ...inv, imageUrl: up.secure_url, createdAt: serverTimestamp() });
+    if (inv.km > (profileData.car.odometer || 0)) {
+      profileData.car = { ...profileData.car, odometer: inv.km }; $("mOdo").value = inv.km;
+      updateDoc(doc(db, "users", uid), { car: profileData.car }).catch(() => {});
+    }
+    URL.revokeObjectURL(invImg.url); invImg = null; $("iImgChip").innerHTML = "";
+    $("iServices").querySelectorAll("input").forEach(x => x.checked = false);
+    ["iKm", "iCenter", "iCost", "iNotes"].forEach(id => $(id).value = "");
+    say("iMsg", "تم حفظ الفاتورة ✓"); loadInvoices();
+  } catch (e) { say("iMsg", "تعذّر الحفظ: " + (e.code || e.message), true); }
+  finally { $("iSave").disabled = false; }
+};
+
+async function loadInvoices(){
+  try {
+    const snap = await getDocs(collection(db, "users", auth.currentUser.uid, "invoices"));
+    INVOICES = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  } catch (e) { console.warn(e); INVOICES = []; }
+  $("iCount").textContent = `الفواتير (${INVOICES.length})`;
+  const box = $("iList"); box.innerHTML = INVOICES.length ? "" : '<div class="note">ما أضفت فواتير للحين. كل فاتورة تضيفها ترفع دقة التقرير وقيمة سيارتك.</div>';
+  for (const v of INVOICES) {
+    const el = document.createElement("div"); el.className = "inv";
+    el.innerHTML = `<a href="${escH(v.imageUrl)}" target="_blank" rel="noopener"><img src="${escH(v.imageUrl)}" alt="صورة الفاتورة"></a>
+      <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+        <b style="font-size:15px">${escH(v.services.join("، "))}</b>
+        <small style="color:var(--muted)">${escH(v.date)} · ${nf(v.km)} كم · ${escH(v.center || "")}</small>
+        <small style="font-weight:800;color:var(--teal-dark)">${nf(v.cost)} ر.س</small>
+      </div>
+      <button type="button" aria-label="حذف الفاتورة" style="border:none;background:none;color:var(--danger);font-size:22px;cursor:pointer;min-width:40px;min-height:40px">×</button>`;
+    el.querySelector("button").onclick = async () => {
+      if (!confirm("حذف هذه الفاتورة من السجل؟")) return;
+      try { await deleteDoc(doc(db, "users", auth.currentUser.uid, "invoices", v.id)); loadInvoices(); } catch (e) { alert("تعذّر الحذف: " + (e.code || e.message)); }
+    };
+    box.appendChild(el);
+  }
+}
+
+// ----- طلب التقرير والدفع -----
+const REPORT_DAYS = 30;
+const reportValid = r => r.status === "paid" && r.paidAt && (Date.now() - new Date(r.paidAt).getTime()) < REPORT_DAYS * 864e5;
+async function loadReports(){
+  const st = $("repState"); st.innerHTML = '<div class="note">جاري التحميل…</div>';
+  try {
+    const [snap, cfg] = await Promise.all([
+      getDocs(query(collection(db, "reports"), where("uid", "==", auth.currentUser.uid))),
+      getDoc(doc(db, "config", "payment"))
+    ]);
+    REPORTS = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    REPCFG = cfg.exists() ? cfg.data() : null;
+  } catch (e) { console.warn(e); st.innerHTML = '<div class="msg err">تعذّر تحميل حالة التقرير.</div>'; return; }
+  renderReportState();
+}
+function reportPrice(){ return Number(REPCFG?.reportPrice) || 49; }
+function renderReportState(){
+  const st = $("repState"); st.innerHTML = "";
+  const valid = REPORTS.find(reportValid), pending = REPORTS.find(r => r.status === "pending"), rejected = REPORTS.find(r => r.status === "rejected");
+  if (valid) {
+    const left = Math.ceil((new Date(valid.paidAt).getTime() + REPORT_DAYS * 864e5 - Date.now()) / 864e5);
+    st.innerHTML = `<span class="paystate" style="background:var(--teal-soft);color:var(--teal-dark)">✓ اشتراك التقرير فعّال · باقي ${left} يوم</span>
+      <button id="repView" class="btn" type="button">عرض التقرير</button>`;
+    $("repView").onclick = () => showReport(valid);
+    return;
+  }
+  if (pending) { st.innerHTML = '<span class="paystate" style="background:#FCEFD9;color:#8A4B0B">💳 بانتظار تأكيد الدفع، بيوصلك التقرير بعد التأكيد.</span>'; return; }
+  const enabled = REPCFG && REPCFG.enabled;
+  if (!REPCFG) { st.innerHTML = '<div class="msg err">بيانات الدفع غير متوفرة حاليًا، حاول لاحقًا.</div>'; return; }
+  st.innerHTML = `${rejected ? `<div class="msg err">لم يتم تأكيد دفعتك السابقة${rejected.payment?.note ? ": " + escH(rejected.payment.note) : ""}</div>` : ""}
+    <div class="payrow"><span>رسوم التقرير (صالح ${REPORT_DAYS} يوم)</span><b>${reportPrice()} ر.س</b></div>
+    ${enabled ? `<div id="repAccts"></div>
+    <button id="repAddRc" type="button" class="btn ghost" style="border:1.5px dashed var(--teal);height:50px">📎 إرفاق إيصال التحويل</button>
+    <input id="repRcIn" type="file" accept="image/*" class="hidden"><div id="repRcChip"></div>` : ""}
+    <button id="repBuy" class="btn" type="button">${enabled ? "طلب التقرير" : "إصدار التقرير"}</button>
+    <div id="repMsg" class="msg" role="status"></div>`;
+  if (enabled) {
+    const box = $("repAccts");
+    const acct = (title, val) => { const a = document.createElement("div"); a.className = "acct";
+      a.innerHTML = `<b>${escH(title)}</b>${REPCFG.beneficiary ? `<div>المستفيد: ${escH(REPCFG.beneficiary)}</div>` : ""}<div class="val"><span>${escH(val)}</span><button type="button">نسخ</button></div>`;
+      a.querySelector("button").onclick = async e => { try { await navigator.clipboard.writeText(val.replace(/\s/g, "")); e.target.textContent = "تم النسخ ✓"; } catch { alert(val); } };
+      box.appendChild(a); };
+    if (REPCFG.iban) acct("تحويل بنكي" + (REPCFG.bankName ? " · " + REPCFG.bankName : ""), REPCFG.iban);
+    if (REPCFG.stcPay) acct("STC Pay", REPCFG.stcPay);
+    $("repAddRc").onclick = () => $("repRcIn").click();
+    $("repRcIn").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+      repReceipt = f; $("repRcChip").innerHTML = `<div class="chip"><img src="${URL.createObjectURL(f)}" alt=""><span>إيصال التحويل</span></div>`; };
+  }
+  $("repBuy").onclick = async () => {
+    if (!INVOICES.length) return say("repMsg", "أضف فاتورة صيانة واحدة على الأقل قبل طلب التقرير.", true);
+    if (!profileData.car?.purchasePrice) return say("repMsg", "اكتب سعر شراء السيارة جديدة واحفظه فوق، عشان نقدّر القيمة.", true);
+    if (enabled && !repReceipt) return say("repMsg", "أرفق إيصال التحويل.", true);
+    $("repBuy").disabled = true; say("repMsg", "جاري الإرسال…");
+    try {
+      const user = auth.currentUser;
+      let payment = { method: "none", status: "not_required", amount: reportPrice() }, status = "paid", extra = { paidAt: new Date().toISOString() };
+      if (enabled) {
+        const up = await uploadToCloudinary(repReceipt, `siyanati/reports/${user.uid}`, "receipt-" + Date.now(), () => {});
+        payment = { method: "transfer", status: "pending", amount: reportPrice(), receiptUrl: up.secure_url, submittedAt: new Date().toISOString() };
+        status = "pending"; extra = {};
+      }
+      await addDoc(collection(db, "reports"), { uid: user.uid, customerName: profileData.name || "", phone: profileData.phone || user.phoneNumber || "",
+        car: profileData.car, payment, status, ...extra, createdAt: serverTimestamp() });
+      repReceipt = null; loadReports();
+    } catch (e) { say("repMsg", "تعذّر الإرسال: " + (e.code || e.message), true); $("repBuy").disabled = false; }
+  };
+}
+
+// ----- حساب التقرير -----
+function analyze(){
+  const car = profileData.car || {}, now = new Date(), year = now.getFullYear();
+  const inv = [...INVOICES].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const odo = Math.max(car.odometer || 0, ...inv.map(v => v.km || 0));
+  const ageY = Math.max(0, year - (Number(car.year) || year) + (now.getMonth() >= 6 ? 0.5 : 0));
+  const total = inv.reduce((a, v) => a + (v.cost || 0), 0);
+  const lastOf = name => [...inv].reverse().find(v => v.services.includes(name));
+  const oilCount = inv.filter(v => v.services.includes("تغيير زيت")).length;
+  const expectedOil = Math.max(1, Math.floor(odo / 10000));
+  // مواعيد الصيانة الدورية
+  const rules = [
+    { name: "تغيير زيت", km: 10000, months: 6 },
+    { name: "فلاتر", km: 20000, months: 12 },
+    { name: "فرامل", km: 40000, months: 24 },
+    { name: "إطارات", km: 50000, months: 48 },
+    { name: "بطارية", km: null, months: 30 },
+    { name: "تكييف", km: null, months: 12 },
+    { name: "فحص دوري", km: 20000, months: 12 },
+  ];
+  const due = rules.map(r => {
+    const last = lastOf(r.name);
+    if (!last) return { ...r, last: null, state: odo > (r.km || 15000) ? "late" : "soon", text: "لا يوجد سجل" };
+    const kmSince = odo - (last.km || 0), mSince = (now - new Date(last.date)) / (30.4 * 864e5);
+    const kmR = r.km ? kmSince / r.km : 0, mR = mSince / r.months, ratio = Math.max(kmR, mR);
+    const state = ratio >= 1 ? "late" : ratio >= 0.8 ? "soon" : "ok";
+    const nextKm = r.km ? (last.km || 0) + r.km : null;
+    return { ...r, last, state, text: state === "late" ? "مستحقة الآن" : (nextKm ? `القادمة عند ${nf(nextKm)} كم` : `خلال ${Math.max(1, Math.round(r.months - mSince))} شهر`) };
+  });
+  // درجة الالتزام بالصيانة
+  let score = 0;
+  score += Math.min(40, (oilCount / expectedOil) * 40);
+  const lastAny = inv[inv.length - 1];
+  const monthsSinceLast = lastAny ? (now - new Date(lastAny.date)) / (30.4 * 864e5) : 99;
+  score += monthsSinceLast <= 6 ? 25 : monthsSinceLast <= 12 ? 12 : 0;
+  score += Math.min(20, (new Set(inv.flatMap(v => v.services)).size / 6) * 20);
+  score += (due.filter(d => d.state === "late").length === 0) ? 15 : Math.max(0, 15 - due.filter(d => d.state === "late").length * 4);
+  score = Math.round(Math.min(100, score));
+  // تقدير القيمة
+  const P = Number(car.purchasePrice) || 0;
+  const a = ageY;
+  let f = a < 0.5 ? 0.92 : 0.85 * Math.pow(0.90, Math.max(0, Math.min(a, 5) - 1)) * Math.pow(0.93, Math.max(0, a - 5));
+  f = Math.max(f, 0.12);
+  const expectedKm = 20000 * Math.max(a, 0.5), diff = (odo - expectedKm) / 10000;
+  const kmAdj = Math.max(-0.20, Math.min(0.08, diff > 0 ? -0.015 * diff : -0.01 * diff));
+  const mAdj = score >= 80 ? 0.04 : score >= 60 ? 0.02 : score >= 40 ? 0 : -0.04;
+  const mid = P * f * (1 + kmAdj + mAdj);
+  const round = x => Math.round(x / 500) * 500;
+  return { car, inv, odo, ageY: a, total, due, score, P, value: { low: round(mid * 0.93), mid: round(mid), high: round(mid * 1.07) },
+    factors: { f, kmAdj, mAdj, expectedKm } };
+}
+
+function showReport(rep){
+  const A = analyze(), c = A.car, today = new Date().toLocaleDateString("ar-SA-u-ca-gregory");
+  const lvl = A.score >= 80 ? ["ممتاز", "ok"] : A.score >= 60 ? ["جيد", "ok"] : A.score >= 40 ? ["متوسط", "soon"] : ["ضعيف", "late"];
+  const pct = x => (x >= 0 ? "+" : "") + Math.round(x * 100) + "%";
+  $("reportBody").innerHTML = `
+  <div class="rp">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+      <div><h3 style="font-size:20px">تقرير حالة السيارة</h3><small style="color:var(--muted)">صيانتي · رقم التقرير ${escH(rep.id.slice(0, 8).toUpperCase())} · ${escH(today)}</small></div>
+      <svg width="44" height="44" viewBox="0 0 120 120" aria-hidden="true"><rect width="120" height="120" rx="26" fill="#0B8A87"/><g transform="translate(60 56) scale(0.6) translate(-60 -60)"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/></g></svg>
+    </div>
+    <table><tr><th>السيارة</th><td>${escH(c.make)} ${escH(c.model)} · موديل ${escH(c.year)}</td></tr>
+      ${c.vin ? `<tr><th>رقم الهيكل</th><td dir="ltr" style="text-align:right">${escH(c.vin)}</td></tr>` : ""}
+      <tr><th>الممشى الحالي</th><td>${nf(A.odo)} كم</td></tr>
+      <tr><th>المالك</th><td>${escH(profileData.name || "")}</td></tr></table>
+  </div>
+
+  <div class="rp">
+    <h3>الملخص</h3>
+    <div class="kpis">
+      <div class="kpi"><b>${A.score}<small>/100</small></b><small>الالتزام بالصيانة · <span class="due ${lvl[1]}">${lvl[0]}</span></small></div>
+      <div class="kpi"><b>${A.inv.length}</b><small>فاتورة صيانة</small></div>
+      <div class="kpi"><b>${nf(A.total)}</b><small>ر.س إجمالي الصيانة</small></div>
+      <div class="kpi"><b>${A.due.filter(d => d.state === "late").length}</b><small>صيانة مستحقة الآن</small></div>
+    </div>
+  </div>
+
+  <div class="rp">
+    <h3>القيمة التقديرية للبيع</h3>
+    <div style="text-align:center;padding:6px 0">
+      <div style="font-size:30px;font-weight:800;color:var(--teal-dark)">${nf(A.value.mid)} ر.س</div>
+      <small style="color:var(--muted)">النطاق المتوقع: ${nf(A.value.low)} – ${nf(A.value.high)} ر.س</small>
+    </div>
+    <table>
+      <tr><th>سعر الشراء جديدة</th><td>${nf(A.P)} ر.س</td></tr>
+      <tr><th>عمر السيارة</th><td>${A.ageY.toFixed(1)} سنة · الاستهلاك: ${Math.round((1 - A.factors.f) * 100)}%</td></tr>
+      <tr><th>الممشى مقارنة بالمعتاد (${nf(A.factors.expectedKm)} كم)</th><td>${pct(A.factors.kmAdj)}</td></tr>
+      <tr><th>سجل الصيانة</th><td>${pct(A.factors.mAdj)}</td></tr>
+    </table>
+    <small style="color:var(--muted);line-height:1.7">تقدير آلي مبني على سعر الشراء وعمر السيارة والممشى وسجل الصيانة. السعر الفعلي يتأثر بالحالة الظاهرية والحوادث والمواصفات والطلب في السوق، ولا يُعد تثمينًا معتمدًا.</small>
+  </div>
+
+  <div class="rp">
+    <h3>الصيانة الدورية</h3>
+    <table><tr><th>البند</th><th>آخر مرة</th><th>الحالة</th></tr>
+      ${A.due.map(d => `<tr><td>${escH(d.name)}</td><td>${d.last ? escH(d.last.date) + " · " + nf(d.last.km) + " كم" : "—"}</td><td><span class="due ${d.state}">${escH(d.text)}</span></td></tr>`).join("")}
+    </table>
+  </div>
+
+  <div class="rp">
+    <h3>سجل الصيانة</h3>
+    <table><tr><th>التاريخ</th><th>الممشى</th><th>الخدمة</th><th>المركز</th><th>المبلغ</th></tr>
+      ${[...A.inv].reverse().map(v => `<tr><td>${escH(v.date)}</td><td>${nf(v.km)}</td><td>${escH(v.services.join("، "))}${v.notes ? `<br><small style="color:var(--muted)">${escH(v.notes)}</small>` : ""}</td><td>${escH(v.center || "")}</td><td>${nf(v.cost)}</td></tr>`).join("") || '<tr><td colspan="5">لا توجد فواتير</td></tr>'}
+    </table>
+  </div>
+
+  <p class="note" style="line-height:1.8">بيانات الفواتير أدخلها مالك السيارة مع صورها، ولم تراجعها «صيانتي». التقرير لأغراض المعلومات، ولا يغني عن فحص السيارة قبل الشراء.</p>`;
+  show("report");
+}
+
 $("editCar").onclick = openProfile;
 $("newReq").onclick = () => { resetRequest(); show("request"); loadPayConfig(); };
 $("logout").onclick = () => { if (unwatch) { unwatch(); unwatch = null; lastSig = null; } setBadge(0); signOut(auth); };

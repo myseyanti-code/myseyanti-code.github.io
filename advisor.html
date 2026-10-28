@@ -109,6 +109,7 @@
         <button data-st="new" class="on">جديدة</button>
         <button data-st="accepted">قيد المتابعة</button>
         <button data-st="answered">تم الرد</button>
+        <button data-st="reports">التقارير</button>
         <button data-st="centers">المراكز</button>
         <button data-st="settings">إعدادات الدفع</button>
         <button data-st="users" class="hidden">المستخدمون</button>
@@ -264,6 +265,7 @@ $("refresh").onclick = () => loadList();
 async function loadList(){
   if (tab === "centers") return loadCenters();
   if (tab === "users") return loadUsers();
+  if (tab === "reports") return loadReportsAdmin();
   if (tab === "settings") { $("list").innerHTML = '<div class="empty">بيانات الحسابات اللي يحوّل لها العملاء.</div>'; return renderPaySettings(); }
   const box = $("list"); box.innerHTML = '<div class="empty">جاري التحميل…</div>';
   try {
@@ -453,6 +455,7 @@ async function renderPaySettings(){
       <div class="field"><label for="p_ben">اسم المستفيد</label><input id="p_ben" value="${esc(v.beneficiary)}"></div>
     </div>
     <div class="field"><label for="p_iban">رقم الآيبان (IBAN)</label><input id="p_iban" value="${esc(v.iban)}" style="direction:ltr" placeholder="SA00 0000 0000 0000 0000 0000"></div>
+    <div class="field"><label for="p_rep">رسوم تقرير حالة السيارة (ر.س)</label><input id="p_rep" type="number" inputmode="numeric" min="0" value="${esc(v.reportPrice || 49)}"></div>
     <div class="field"><label for="p_stc">رقم STC Pay (اختياري)</label><input id="p_stc" value="${esc(v.stcPay)}" type="tel" style="direction:ltr" placeholder="05XXXXXXXX"></div>
     <div class="row" style="justify-content:flex-end"><button id="p_save" class="btn">حفظ</button></div>
     <div id="p_msg" class="msg" role="status"></div>
@@ -460,13 +463,65 @@ async function renderPaySettings(){
   $("p_save").onclick = async () => {
     const iban = $("p_iban").value.toUpperCase().replace(/\s/g, "");
     const data = { enabled: $("p_en").checked, bankName: $("p_bank").value.trim(), beneficiary: $("p_ben").value.trim(),
-      iban: iban.replace(/(.{4})/g, "$1 ").trim(), stcPay: $("p_stc").value.trim(), updatedAt: serverTimestamp(), updatedBy: me.uid };
+      iban: iban.replace(/(.{4})/g, "$1 ").trim(), stcPay: $("p_stc").value.trim(), reportPrice: Number($("p_rep").value) || 49, updatedAt: serverTimestamp(), updatedBy: me.uid };
     if (iban && !/^SA\d{22}$/.test(iban)) return say("p_msg", "الآيبان السعودي يبدأ بـ SA ويتكون من 24 خانة.", true);
     if (data.enabled && !iban && !data.stcPay) return say("p_msg", "أضف آيبان أو رقم STC Pay قبل التفعيل.", true);
     $("p_save").disabled = true; say("p_msg", "جاري الحفظ…");
     try { await setDoc(doc(db, "config", "payment"), data); say("p_msg", "تم الحفظ ✓"); }
     catch (e) { say("p_msg", "تعذّر الحفظ: " + (e.code || e.message), true); }
     finally { $("p_save").disabled = false; }
+  };
+}
+
+// ===== تقارير حالة السيارة =====
+async function loadReportsAdmin(){
+  const box = $("list"); box.innerHTML = '<div class="empty">جاري التحميل…</div>';
+  try {
+    const snap = await getDocs(collection(db, "reports"));
+    const order = { pending: 0, rejected: 1, paid: 2 };
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (order[a.status] ?? 3) - (order[b.status] ?? 3) || (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    box.innerHTML = `<small style="color:var(--muted)">${list.filter(r => r.status === "pending").length} بانتظار تأكيد الدفع · ${list.length} إجمالي</small>`;
+    if (!list.length) { box.insertAdjacentHTML("beforeend", '<div class="empty">لا توجد طلبات تقارير.</div>'); return; }
+    for (const r of list) {
+      const el = document.createElement("button"); el.className = "item";
+      const tag = r.status === "pending" ? '<span class="tag call">💳 بانتظار تأكيد الدفع</span>' : r.status === "paid" ? '<span class="tag">✓ مدفوع</span>' : '<span class="tag" style="background:#FDECEC;color:var(--danger)">✕ مرفوض</span>';
+      el.innerHTML = `<b>${esc(r.customerName || "عميل")}</b><small>${esc(r.car?.make)} ${esc(r.car?.model)} ${esc(r.car?.year)} · ${fmtDate(r.createdAt)}</small><div class="row">${tag}<small>${esc(r.payment?.amount)} ر.س</small></div>`;
+      el.onclick = () => renderReportAdmin(r);
+      box.appendChild(el);
+    }
+  } catch (e) { console.error(e); box.innerHTML = `<div class="empty">تعذّر التحميل: ${esc(e.code || e.message)}</div>`; }
+}
+function renderReportAdmin(r){
+  const p = r.payment || {};
+  $("detail").innerHTML = `
+  <section class="card" style="display:flex;flex-direction:column;gap:12px">
+    <h2>طلب تقرير حالة السيارة</h2>
+    <div class="answered">
+      <b>العميل:</b> ${esc(r.customerName)} · <bdi dir="ltr">${esc(fmtPhone(r.phone))}</bdi><br>
+      <b>السيارة:</b> ${esc(r.car?.make)} ${esc(r.car?.model)} · موديل ${esc(r.car?.year)}<br>
+      <b>المبلغ:</b> ${esc(p.amount)} ر.س · <b>الحالة:</b> ${r.status === "pending" ? "بانتظار التأكيد" : r.status === "paid" ? "مدفوع" : "مرفوض"}
+      ${r.paidAt ? `<br><b>تاريخ التفعيل:</b> ${esc(new Date(r.paidAt).toLocaleDateString("ar-SA-u-ca-gregory"))}` : ""}
+      ${p.note ? `<br><b>ملاحظة:</b> ${esc(p.note)}` : ""}
+    </div>
+    ${p.receiptUrl ? `<a href="${esc(p.receiptUrl)}" target="_blank" rel="noopener"><img src="${esc(p.receiptUrl)}" alt="إيصال التحويل" style="max-width:260px;border-radius:12px"></a>` : ""}
+    ${r.status === "pending" ? '<div class="row"><button id="rOk" class="btn">تأكيد استلام المبلغ وتفعيل التقرير</button><button id="rNo" class="btn ghost" style="color:var(--danger);border-color:var(--danger)">رفض الإيصال</button></div>' : ""}
+    <div class="row" style="justify-content:flex-end"><button id="rDel" class="btn ghost" style="color:var(--danger);border-color:var(--danger)">حذف</button></div>
+  </section>`;
+  if ($("rOk")) $("rOk").onclick = async () => {
+    if (!confirm(`تأكيد وصول ${p.amount} ر.س؟`)) return;
+    try { await updateDoc(doc(db, "reports", r.id), { status: "paid", paidAt: new Date().toISOString(), payment: { ...p, status: "confirmed", confirmedBy: me.uid } }); loadReportsAdmin(); $("detail").innerHTML = '<div class="card empty">تم تفعيل التقرير للعميل ✓</div>'; }
+    catch (e) { alert("تعذّر التأكيد: " + (e.code || e.message)); }
+  };
+  if ($("rNo")) $("rNo").onclick = async () => {
+    const note = prompt("سبب الرفض (يظهر للعميل):", "المبلغ لم يصل أو الإيصال غير واضح"); if (note === null) return;
+    try { await updateDoc(doc(db, "reports", r.id), { status: "rejected", payment: { ...p, status: "rejected", note: note.trim().slice(0, 200) } }); loadReportsAdmin(); $("detail").innerHTML = '<div class="card empty">تم رفض الإيصال.</div>'; }
+    catch (e) { alert("تعذّر الرفض: " + (e.code || e.message)); }
+  };
+  $("rDel").onclick = async () => {
+    if (!confirm("حذف طلب التقرير؟")) return;
+    try { await deleteDoc(doc(db, "reports", r.id)); loadReportsAdmin(); $("detail").innerHTML = '<div class="card empty">تم الحذف.</div>'; }
+    catch (e) { alert("تعذّر الحذف: " + (e.code || e.message)); }
   };
 }
 
