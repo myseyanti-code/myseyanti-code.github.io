@@ -477,7 +477,7 @@ async function loadUsers(){
   const box = $("list"); box.innerHTML = '<div class="empty">جاري التحميل…</div>';
   try {
     const snap = await getDocs(collection(db, "users"));
-    USERS = snap.docs.map(d => ({ uid: d.id, ...d.data() }))
+    USERS = snap.docs.map(d => ({ uid: d.id, ...d.data() })).map(u => ({ ...u, role: u.role || "customer" }))
       .sort((a, b) => (["admin","advisor","customer"].indexOf(a.role) - ["admin","advisor","customer"].indexOf(b.role)) || (a.name || "").localeCompare(b.name || "", "ar"));
     box.innerHTML = `<input id="uSearch" type="search" placeholder="ابحث بالاسم أو الجوال أو البريد" aria-label="بحث">
       <small style="color:var(--muted)">${USERS.length} مستخدم · ${USERS.filter(u => u.role === "advisor").length} مستشار</small>
