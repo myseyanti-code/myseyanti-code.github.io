@@ -455,6 +455,11 @@ async function renderPaySettings(){
       <div class="field"><label for="p_ben">اسم المستفيد</label><input id="p_ben" value="${esc(v.beneficiary)}"></div>
     </div>
     <div class="field"><label for="p_iban">رقم الآيبان (IBAN)</label><input id="p_iban" value="${esc(v.iban)}" style="direction:ltr" placeholder="SA00 0000 0000 0000 0000 0000"></div>
+    <h3 style="margin-top:6px">الأسعار</h3>
+    <div class="grid">
+      <div class="field"><label for="p_chat">استشارة محادثة كتابية (ر.س)</label><input id="p_chat" type="number" inputmode="numeric" min="0" value="${esc(v.chatPrice || 25)}"></div>
+      <div class="field"><label for="p_call">استشارة مكالمة صوتية (ر.س)</label><input id="p_call" type="number" inputmode="numeric" min="0" value="${esc(v.callPrice || 45)}"></div>
+    </div>
     <div class="field"><label for="p_rep">رسوم تقرير حالة السيارة (ر.س)</label><input id="p_rep" type="number" inputmode="numeric" min="0" value="${esc(v.reportPrice || 49)}"></div>
     <div class="field"><label for="p_stc">رقم STC Pay (اختياري)</label><input id="p_stc" value="${esc(v.stcPay)}" type="tel" style="direction:ltr" placeholder="05XXXXXXXX"></div>
     <div class="row" style="justify-content:flex-end"><button id="p_save" class="btn">حفظ</button></div>
@@ -463,7 +468,7 @@ async function renderPaySettings(){
   $("p_save").onclick = async () => {
     const iban = $("p_iban").value.toUpperCase().replace(/\s/g, "");
     const data = { enabled: $("p_en").checked, bankName: $("p_bank").value.trim(), beneficiary: $("p_ben").value.trim(),
-      iban: iban.replace(/(.{4})/g, "$1 ").trim(), stcPay: $("p_stc").value.trim(), reportPrice: Number($("p_rep").value) || 49, updatedAt: serverTimestamp(), updatedBy: me.uid };
+      iban: iban.replace(/(.{4})/g, "$1 ").trim(), stcPay: $("p_stc").value.trim(), reportPrice: Number($("p_rep").value) || 49, chatPrice: Number($("p_chat").value) || 25, callPrice: Number($("p_call").value) || 45, updatedAt: serverTimestamp(), updatedBy: me.uid };
     if (iban && !/^SA\d{22}$/.test(iban)) return say("p_msg", "الآيبان السعودي يبدأ بـ SA ويتكون من 24 خانة.", true);
     if (data.enabled && !iban && !data.stcPay) return say("p_msg", "أضف آيبان أو رقم STC Pay قبل التفعيل.", true);
     $("p_save").disabled = true; say("p_msg", "جاري الحفظ…");

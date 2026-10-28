@@ -299,8 +299,8 @@
       </div>
       <fieldset style="border:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px">
         <legend style="font-size:16px;font-weight:700;padding:0;margin-bottom:8px">طريقة رد المستشار</legend>
-        <label class="opt"><input type="radio" name="reply" value="chat" checked><span><b>محادثة كتابية</b><small>رد مكتوب تقرأه في أي وقت</small></span><span class="price">25 ر.س</span></label>
-        <label class="opt"><input type="radio" name="reply" value="call"><span><b>مكالمة صوتية</b><small>يتصل عليك المستشار ويشرح لك</small></span><span class="price">45 ر.س</span></label>
+        <label class="opt"><input type="radio" name="reply" value="chat" checked><span><b>محادثة كتابية</b><small>رد مكتوب تقرأه في أي وقت</small></span><span class="price" id="priceChat">25 ر.س</span></label>
+        <label class="opt"><input type="radio" name="reply" value="call"><span><b>مكالمة صوتية</b><small>يتصل عليك المستشار ويشرح لك</small></span><span class="price" id="priceCall">45 ر.س</span></label>
       </fieldset>
       <div id="payBox" class="field hidden">
         <label>الدفع</label>
@@ -798,14 +798,18 @@ $("recBtn").onclick = async () => {
 // ===== الدفع (تحويل يدوي مؤقت) =====
 let PAYCFG = null, PAYSTATE = "loading", receipt = null; // loading | on | off | missing | error
 const PRICES = { chat: 25, call: 45 };
+function applyPrices(){ $("priceChat").textContent = PRICES.chat + " ر.س"; $("priceCall").textContent = PRICES.call + " ر.س"; $("payAmount").textContent = priceOf() + " ر.س"; }
 const priceOf = () => PRICES[document.querySelector('input[name="reply"]:checked').value];
 async function loadPayConfig(){
   PAYSTATE = "loading"; PAYCFG = null;
   try {
     const snap = await getDoc(doc(db, "config", "payment"));
     if (!snap.exists()) PAYSTATE = "missing";
-    else if (snap.data().enabled) { PAYCFG = snap.data(); PAYSTATE = "on"; }
-    else PAYSTATE = "off";
+    else {
+      const d = snap.data();
+      PRICES.chat = Number(d.chatPrice) || 25; PRICES.call = Number(d.callPrice) || 45; applyPrices();
+      if (d.enabled) { PAYCFG = d; PAYSTATE = "on"; } else PAYSTATE = "off";
+    }
   } catch (e) { console.warn(e); PAYSTATE = "error"; }
   $("payBox").classList.toggle("hidden", PAYSTATE !== "on");
   if (PAYSTATE === "missing" || PAYSTATE === "error")
@@ -901,7 +905,7 @@ $("submitReq").onclick = async () => {
     await setDoc(reqRef, {
       uid: user.uid, phone: profileData.phone || user.phoneNumber || "",
       customerName: profileData.name, city: profileData.city || "", car: profileData.car,
-      description, replyType, price: replyType === "call" ? 45 : 25,
+      description, replyType, price: PRICES[replyType],
       attachments, payment, status: "new", paid: payment.status === "not_required", createdAt: serverTimestamp()
     });
     resetRequest(); show("sent");
