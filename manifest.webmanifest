@@ -1,6 +1,6 @@
 {
-  "name": "صيانتي",
-  "short_name": "صيانتي",
+  "name": "سي أويل",
+  "short_name": "سي أويل",
   "description": "مستشارك الموثوق لسيارتك",
   "lang": "ar",
   "dir": "rtl",
@@ -10,7 +10,7 @@
   "background_color": "#F4F8F8",
   "theme_color": "#0B8A87",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }

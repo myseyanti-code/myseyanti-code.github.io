@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B8A87">
-<title>صيانتي</title>
+<title>سي أويل</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="صيانتي">
+<meta name="apple-mobile-web-app-title" content="سي أويل">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
@@ -116,8 +116,8 @@
 
   <!-- شاشة التحميل -->
   <section id="splash" style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
-    <svg width="72" height="72" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#0B8A87"/><g transform="translate(18 6.5) scale(3.5)" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></g></svg>
-    <div style="font-size:24px;font-weight:800;color:#0E2A2F">صيانتي</div>
+    <img src="logo.png" alt="سي أويل" style="width:220px;max-width:70vw;height:auto">
+    <div style="font-size:24px;font-weight:800;color:#0E2A2F">سي أويل</div>
     <div style="font-size:14px;color:#4A6266">جاري التحميل…</div>
   </section>
 
@@ -125,8 +125,8 @@
   <section id="login" class="hidden">
     <div class="hero">
       <div class="brand">
-        <svg width="40" height="40" viewBox="0 0 120 120" aria-hidden="true"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/><g transform="translate(18 6.5) scale(3.5)" fill="none" stroke="#0B8A87" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></g></svg>
-        صيانتي
+        <img src="logo-mark.png" alt="سي أويل" style="height:40px;width:auto;background:#fff;border-radius:10px;padding:5px 8px;box-sizing:content-box">
+        سي أويل
       </div>
       <h1>مستشارك الموثوق لسيارتك</h1>
       <p>اشرح مشكلة سيارتك، ويرد عليك مستشار صيانة بالتشخيص والتكلفة التقريبية وأقرب مركز موثوق.</p>
@@ -183,7 +183,7 @@
   <!-- الرئيسية -->
   <section id="home" class="hidden">
     <div class="hero">
-      <div class="brand" style="font-size:22px">صيانتي</div>
+      <div class="brand" style="font-size:22px">سي أويل</div>
       <h1 id="hello">أهلًا</h1>
       <div class="carcard">
         <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0B8A87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></div>
@@ -570,7 +570,7 @@ let swReg = null;
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").then(r => swReg = r).catch(() => {});
 const canNotify = () => "Notification" in window;
 async function askNotify(btn){
-  if (!canNotify()) { alert("التنبيهات تحتاج فتح «صيانتي» من أيقونة الشاشة الرئيسية (على آيفون/آيباد)."); return; }
+  if (!canNotify()) { alert("التنبيهات تحتاج فتح «سي أويل» من أيقونة الشاشة الرئيسية (على آيفون/آيباد)."); return; }
   const p = await Notification.requestPermission();
   if (btn) btn.classList.toggle("hidden", p !== "default");
   if (p === "granted") notify("تم تفعيل التنبيهات ✓", "بيوصلك تنبيه هنا عند كل جديد.");
@@ -1136,8 +1136,8 @@ function showReport(rep){
   $("reportBody").innerHTML = `
   <div class="rp">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
-      <div><h3 style="font-size:20px">تقرير حالة السيارة</h3><small style="color:var(--muted)">صيانتي · رقم التقرير ${escH(rep.id.slice(0, 8).toUpperCase())} · ${escH(today)}</small></div>
-      <svg width="44" height="44" viewBox="0 0 120 120" aria-hidden="true"><rect width="120" height="120" rx="26" fill="#0B8A87"/><g transform="translate(60 56) scale(0.6) translate(-60 -60)"><path d="M32 8H88A24 24 0 0 1 112 32V72A24 24 0 0 1 88 96H60L42 113V96H32A24 24 0 0 1 8 72V32A24 24 0 0 1 32 8Z" fill="#fff"/></g></svg>
+      <div><h3 style="font-size:20px">تقرير حالة السيارة</h3><small style="color:var(--muted)">سي أويل · رقم التقرير ${escH(rep.id.slice(0, 8).toUpperCase())} · ${escH(today)}</small></div>
+      <img src="logo-mark.png" alt="سي أويل" style="height:44px;width:auto;background:#fff;border-radius:10px;padding:5px 8px;box-sizing:content-box">
     </div>
     <table><tr><th>السيارة</th><td>${escH(c.make)} ${escH(c.model)} · موديل ${escH(c.year)}</td></tr>
       ${c.vin ? `<tr><th>رقم الهيكل</th><td dir="ltr" style="text-align:right">${escH(c.vin)}</td></tr>` : ""}
@@ -1184,7 +1184,7 @@ function showReport(rep){
     </table>
   </div>
 
-  <p class="note" style="line-height:1.8">بيانات الفواتير أدخلها مالك السيارة مع صورها، ولم تراجعها «صيانتي». التقرير لأغراض المعلومات، ولا يغني عن فحص السيارة قبل الشراء.</p>`;
+  <p class="note" style="line-height:1.8">بيانات الفواتير أدخلها مالك السيارة مع صورها، ولم تراجعها «سي أويل». التقرير لأغراض المعلومات، ولا يغني عن فحص السيارة قبل الشراء.</p>`;
   show("report");
 }
 
